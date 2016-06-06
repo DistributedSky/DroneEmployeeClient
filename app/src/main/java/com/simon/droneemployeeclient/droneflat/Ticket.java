@@ -4,7 +4,7 @@ package com.simon.droneemployeeclient.droneflat;
  * Created by simon on 06.06.16.
  */
 public class Ticket {
-    Ticket(Drone drone, String id){
+    public Ticket(Drone drone, String id){
         mDrone = drone;
         mId = id;
     }

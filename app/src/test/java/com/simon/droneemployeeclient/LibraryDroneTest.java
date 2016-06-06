@@ -1,12 +1,10 @@
 package com.simon.droneemployeeclient;
 
 import com.simon.droneemployeeclient.droneflat.Drone;
-import com.simon.droneemployeeclient.droneflat.DroneBase;
+import com.simon.droneemployeeclient.droneflat.DroneList;
 import com.simon.droneemployeeclient.droneflat.DroneEmployeeBase;
 import com.simon.droneemployeeclient.droneflat.LatLngAlt;
 import com.simon.droneemployeeclient.droneflat.Task;
-
-import static org.junit.Assert.*;
 
 /**
  * To work on unit tests, switch the LibraryDroneTest Artifact in the Build Variants view.
@@ -24,7 +22,7 @@ public class LibraryDroneTest {
     @org.junit.Test
     public void droneEmployeeBaseTest() throws Exception {
         DroneEmployeeBase deb = new DroneEmployeeBase();
-        DroneBase droneBase = deb.loadAvailableDrones();
+        DroneList droneBase = deb.loadAvailableDrones();
         System.out.println(droneBase);
 
         Drone drone = droneBase.get(2);

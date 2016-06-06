@@ -1,8 +1,9 @@
 package com.simon.droneemployeeclient;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.View;
@@ -14,24 +15,26 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.simon.droneemployeeclient.droneflat.DroneBase;
+import com.simon.droneemployeeclient.droneflat.Drone;
+import com.simon.droneemployeeclient.droneflat.DroneList;
 import com.simon.droneemployeeclient.droneflat.DroneEmployeeBase;
+import com.simon.droneemployeeclient.droneflat.SwitchButton;
+import com.simon.droneemployeeclient.droneflat.Task;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private FragmentManager fragmentManager;
-    private MapTools mapTools;
-    private DroneEmployeeBase droneEmployeeBase;
-    private DroneBase droneBase;
+    private Menu mSideMenu;
+    private FragmentManager mFragmentManager;
+    private MapTools mMapTools;
+    private DroneEmployeeBase mDroneEmployeeBase;
+    private DroneList mAvailableDrones;
+    private ItemIdTaskMap mItemIdTaskMap;
+    private Task mCurrentTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,15 +43,17 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         //Fragment manager initialize
-        fragmentManager = getSupportFragmentManager();
+        mFragmentManager = getSupportFragmentManager();
 
         //MapTools initialize
-        mapTools = new MapTools((SupportMapFragment) fragmentManager.
+        mMapTools = new MapTools((SupportMapFragment) mFragmentManager.
                 findFragmentById(R.id.location_map));
 
         //Employee initialize
-        droneEmployeeBase = new DroneEmployeeBase();
-        droneBase = droneEmployeeBase.loadAvailableDrones();
+        mDroneEmployeeBase = new DroneEmployeeBase();
+        mAvailableDrones = mDroneEmployeeBase.loadAvailableDrones();
+        mItemIdTaskMap = new ItemIdTaskMap();
+        mCurrentTask = null;
 
         //Toolbar initialize
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -56,31 +61,23 @@ public class MainActivity extends AppCompatActivity
 
         //Floating button initialize
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            boolean flag = true;
-            @Override
-            public void onClick(View view) {
-                /*
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                        */
-                ((FloatingActionButton) view).setImageDrawable(getResources()
-                        .getDrawable(flag? R.drawable.ic_done_light: R.drawable.ic_add_light));
-                flag = !flag;
-                Log.i("LOGINFO", "Click fab");
-            }
-        });
+        fab.setOnClickListener(new SwitchButton(
+                getResources().getDrawable(R.drawable.ic_done_light),
+                getResources().getDrawable(R.drawable.ic_add_light),
+                mMapTools));
 
         //???
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar, R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        //???
+        //Initialize NavigationView
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        mSideMenu = navigationView.getMenu();
     }
 
     @Override
@@ -97,6 +94,11 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        /*
+        for(Drone drone: mAvailableDrones){
+            menu.add(drone.getAddress());
+        }
+        */
         return true;
     }
 
@@ -110,6 +112,10 @@ public class MainActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        } else if (id == R.id.action_send_tasks){
+            for(Task task: mItemIdTaskMap.values()){
+                mDroneEmployeeBase.sendTask(task);
+            }
         }
 
         return super.onOptionsItemSelected(item);
@@ -120,10 +126,39 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+        Log.i("LOGINFO", "IN onNavigationItemSelected ID: " + id);
 
         if (id == R.id.nav_buy) {
             Log.i("LOGINFO", "Select nav_buy");
-            // Handle the buy action
+            ArrayList<String> allId = mAvailableDrones.getAllId();
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Available DRONES:");
+            builder.setItems(allId.toArray(new String[allId.size()]),
+                    new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Drone drone = mAvailableDrones.get(which);
+                    Log.i("LOGINFO", String.valueOf(drone));
+
+                    Task task = new Task(mDroneEmployeeBase.byTicket(drone));
+                    task.addWaypoint(drone.getLastPosition());
+                    if(mCurrentTask == null) {
+                        mCurrentTask = task;
+                        mMapTools.setCurrentTask(task);
+                    }
+
+                    MenuItem menuItem = mSideMenu.add(0, drone.hashCode(), 0, drone.getAddress());
+                    mItemIdTaskMap.put(menuItem.getItemId(), task);
+                    mAvailableDrones.remove(which);
+                }
+            });
+            builder.show();
+            return true;
+        } else if (mItemIdTaskMap.containsKey(id)) {
+            Task task = mItemIdTaskMap.get(id);
+            Log.i("LOGINFO", "Select TASK: " + task);
+            mCurrentTask = task;
+            mMapTools.setCurrentTask(task);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

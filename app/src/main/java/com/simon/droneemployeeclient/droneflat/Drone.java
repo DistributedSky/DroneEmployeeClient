@@ -13,7 +13,11 @@ public class Drone {
         mLastPosition = lastPosition;
 	}
 
-    public State getState(){
+    public String getAddress() {
+        return mAddress;
+    }
+
+    public State getState() {
         return mState;
     }
 

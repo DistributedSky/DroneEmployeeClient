@@ -8,8 +8,8 @@ import android.util.Log;
 public class DroneEmployeeBase {
     public DroneEmployeeBase(){}
 
-    public DroneBase loadAvailableDrones(){
-        DroneBase droneBase = new DroneBase();
+    public DroneList loadAvailableDrones(){
+        DroneList droneBase = new DroneList();
         droneBase.add(new Drone(genirateHexRandomString(), Drone.State.AVAILABLE,
                 new LatLngAlt(59.903322, 30.267378, 10)));
         droneBase.add(new Drone(genirateHexRandomString(), Drone.State.AVAILABLE,
@@ -26,6 +26,7 @@ public class DroneEmployeeBase {
 
     public void sendTask(Task task){
         //System.out.println(LOG + ": SEND: " + task);
+        Log.i(LOG, "SEND: " + task);
     }
 
     private String genirateHexRandomString(){
