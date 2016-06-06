@@ -22,11 +22,16 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.simon.droneemployeeclient.droneflat.DroneBase;
+import com.simon.droneemployeeclient.droneflat.DroneEmployeeBase;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    public static FragmentManager fragmentManager;
+    private FragmentManager fragmentManager;
+    private MapTools mapTools;
+    private DroneEmployeeBase droneEmployeeBase;
+    private DroneBase droneBase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +41,14 @@ public class MainActivity extends AppCompatActivity
 
         //Fragment manager initialize
         fragmentManager = getSupportFragmentManager();
+
+        //MapTools initialize
+        mapTools = new MapTools((SupportMapFragment) fragmentManager.
+                findFragmentById(R.id.location_map));
+
+        //Employee initialize
+        droneEmployeeBase = new DroneEmployeeBase();
+        droneBase = droneEmployeeBase.loadAvailableDrones();
 
         //Toolbar initialize
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
