@@ -1,4 +1,4 @@
-package com.simon.droneemployeeclient.droneemployee;
+package com.droneemployee.client.droneemployee;
 
 import android.util.Log;
 

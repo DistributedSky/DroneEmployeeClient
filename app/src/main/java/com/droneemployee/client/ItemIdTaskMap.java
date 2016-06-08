@@ -1,6 +1,6 @@
-package com.simon.droneemployeeclient;
+package com.droneemployee.client;
 
-import com.simon.droneemployeeclient.droneemployee.Task;
+import com.droneemployee.client.droneemployee.Task;
 
 import java.util.HashMap;
 

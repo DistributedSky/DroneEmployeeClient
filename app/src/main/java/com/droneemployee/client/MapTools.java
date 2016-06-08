@@ -1,4 +1,4 @@
-package com.simon.droneemployeeclient;
+package com.droneemployee.client;
 
 import android.graphics.Color;
 import android.util.Log;
@@ -11,8 +11,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.simon.droneemployeeclient.droneemployee.LatLngAlt;
-import com.simon.droneemployeeclient.droneemployee.Task;
+import com.droneemployee.client.droneemployee.LatLngAlt;
+import com.droneemployee.client.droneemployee.Task;
 
 import java.util.HashMap;
 import java.util.List;

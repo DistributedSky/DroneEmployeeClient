@@ -1,13 +1,8 @@
-package com.simon.droneemployeeclient;
+package com.droneemployee.client;
 
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.support.design.widget.FloatingActionButton;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-
-import com.simon.droneemployeeclient.R;
 
 /**
  * Created by simon on 07.06.16.

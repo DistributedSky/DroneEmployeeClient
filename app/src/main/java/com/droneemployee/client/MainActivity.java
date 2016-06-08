@@ -1,4 +1,4 @@
-package com.simon.droneemployeeclient;
+package com.droneemployee.client;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -16,10 +16,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.android.gms.maps.SupportMapFragment;
-import com.simon.droneemployeeclient.droneemployee.Drone;
-import com.simon.droneemployeeclient.droneemployee.DroneList;
-import com.simon.droneemployeeclient.droneemployee.DroneEmployeeBase;
-import com.simon.droneemployeeclient.droneemployee.Task;
+import com.droneemployee.client.droneemployee.Drone;
+import com.droneemployee.client.droneemployee.DroneList;
+import com.droneemployee.client.droneemployee.DroneEmployeeBase;
+import com.droneemployee.client.droneemployee.Task;
 
 import java.util.ArrayList;
 

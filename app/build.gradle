@@ -5,11 +5,12 @@ android {
     buildToolsVersion "23.0.3"
 
     defaultConfig {
-        applicationId "com.simon.droneemployeeclient"
+        applicationId "com.droneemployee.client"
         minSdkVersion 21
         targetSdkVersion 23
         versionCode 1
-        versionName "1.0"
+        versionName "0.1"
+        multiDexEnabled true
     }
     buildTypes {
         release {

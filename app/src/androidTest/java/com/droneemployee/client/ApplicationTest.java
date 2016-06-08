@@ -1,4 +1,4 @@
-package com.simon.droneemployeeclient;
+package com.droneemployee.client;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
