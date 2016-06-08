@@ -1,8 +1,6 @@
 package com.simon.droneemployeeclient;
 
-import android.view.MenuItem;
-
-import com.simon.droneemployeeclient.droneflat.Task;
+import com.simon.droneemployeeclient.droneemployee.Task;
 
 import java.util.HashMap;
 

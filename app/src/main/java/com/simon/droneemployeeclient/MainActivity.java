@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -17,11 +16,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.android.gms.maps.SupportMapFragment;
-import com.simon.droneemployeeclient.droneflat.Drone;
-import com.simon.droneemployeeclient.droneflat.DroneList;
-import com.simon.droneemployeeclient.droneflat.DroneEmployeeBase;
-import com.simon.droneemployeeclient.droneflat.SwitchButton;
-import com.simon.droneemployeeclient.droneflat.Task;
+import com.simon.droneemployeeclient.droneemployee.Drone;
+import com.simon.droneemployeeclient.droneemployee.DroneList;
+import com.simon.droneemployeeclient.droneemployee.DroneEmployeeBase;
+import com.simon.droneemployeeclient.droneemployee.Task;
 
 import java.util.ArrayList;
 
@@ -35,6 +33,7 @@ public class MainActivity extends AppCompatActivity
     private DroneList mAvailableDrones;
     private ItemIdTaskMap mItemIdTaskMap;
     private Task mCurrentTask;
+    private SwitchButton mSwitchButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,10 +60,12 @@ public class MainActivity extends AppCompatActivity
 
         //Floating button initialize
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new SwitchButton(
+        mSwitchButton = new SwitchButton(
+                fab,
                 getResources().getDrawable(R.drawable.ic_done_light),
                 getResources().getDrawable(R.drawable.ic_add_light),
-                mMapTools));
+                mMapTools);
+        fab.setOnClickListener(mSwitchButton);
 
         //???
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -116,6 +117,13 @@ public class MainActivity extends AppCompatActivity
             for(Task task: mItemIdTaskMap.values()){
                 mDroneEmployeeBase.sendTask(task);
             }
+            for(int key: mItemIdTaskMap.keySet()){
+                mSideMenu.removeItem(key);
+            }
+            mMapTools.getMap().clear();
+            mMapTools.setCurrentTask(null);
+            mItemIdTaskMap = new ItemIdTaskMap();
+            mCurrentTask = null;
         }
 
         return super.onOptionsItemSelected(item);
@@ -130,6 +138,7 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_buy) {
             Log.i("LOGINFO", "Select nav_buy");
+            mSwitchButton.off();
             ArrayList<String> allId = mAvailableDrones.getAllId();
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Available DRONES:");
@@ -142,10 +151,8 @@ public class MainActivity extends AppCompatActivity
 
                     Task task = new Task(mDroneEmployeeBase.byTicket(drone));
                     task.addWaypoint(drone.getLastPosition());
-                    if(mCurrentTask == null) {
-                        mCurrentTask = task;
-                        mMapTools.setCurrentTask(task);
-                    }
+                    mCurrentTask = task;
+                    mMapTools.setCurrentTask(task);
 
                     MenuItem menuItem = mSideMenu.add(0, drone.hashCode(), 0, drone.getAddress());
                     mItemIdTaskMap.put(menuItem.getItemId(), task);
@@ -159,6 +166,7 @@ public class MainActivity extends AppCompatActivity
             Log.i("LOGINFO", "Select TASK: " + task);
             mCurrentTask = task;
             mMapTools.setCurrentTask(task);
+            mSwitchButton.off();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

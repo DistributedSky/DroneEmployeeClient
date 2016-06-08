@@ -1,10 +1,10 @@
 package com.simon.droneemployeeclient;
 
-import com.simon.droneemployeeclient.droneflat.Drone;
-import com.simon.droneemployeeclient.droneflat.DroneList;
-import com.simon.droneemployeeclient.droneflat.DroneEmployeeBase;
-import com.simon.droneemployeeclient.droneflat.LatLngAlt;
-import com.simon.droneemployeeclient.droneflat.Task;
+import com.simon.droneemployeeclient.droneemployee.Drone;
+import com.simon.droneemployeeclient.droneemployee.DroneList;
+import com.simon.droneemployeeclient.droneemployee.DroneEmployeeBase;
+import com.simon.droneemployeeclient.droneemployee.LatLngAlt;
+import com.simon.droneemployeeclient.droneemployee.Task;
 
 /**
  * To work on unit tests, switch the LibraryDroneTest Artifact in the Build Variants view.

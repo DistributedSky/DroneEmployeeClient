@@ -1,5 +1,6 @@
 package com.simon.droneemployeeclient;
 
+import android.graphics.Color;
 import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -7,28 +8,73 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.simon.droneemployeeclient.droneflat.Drone;
-import com.simon.droneemployeeclient.droneflat.LatLngAlt;
-import com.simon.droneemployeeclient.droneflat.SwitchButton;
-import com.simon.droneemployeeclient.droneflat.Task;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.simon.droneemployeeclient.droneemployee.LatLngAlt;
+import com.simon.droneemployeeclient.droneemployee.Task;
+
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by simon on 06.06.16.
  */
 public class MapTools implements OnMapReadyCallback, SwitchButton.OnSwitchListener {
-    MapTools(SupportMapFragment mapFragment) {
+    public MapTools(SupportMapFragment mapFragment) {
         Log.i(LOGNAME, "IN MapTools()");
         mapFragment.getMapAsync(this);
         mCurrentTask = null;
+        mTaskPolylineMap = new TaskPolylineMap();
     }
 
     public void setCurrentTask(Task task){
+        if(mCurrentTask != null){
+            mTaskPolylineMap.get(mCurrentTask).setColor(Color.BLACK);
+        }
+        if(task == null){
+            mCurrentTask = null;
+            return;
+        }
         mCurrentTask = task;
+        if(!mTaskPolylineMap.containsKey(task)){
+            LatLng latLng = new LatLng(task.getWaypoint(0).lat, task.getWaypoint(0).lon);
+            PolylineOptions polylineOptions = new PolylineOptions();
+            polylineOptions.geodesic(true);
+            polylineOptions.color(Color.RED);
+            polylineOptions.add(latLng);
+            Polyline polyline = mMap.addPolyline(polylineOptions);
+            mTaskPolylineMap.put(task, polyline);
+            mMap.addMarker(new MarkerOptions().
+                    position(latLng));
+        } else {
+            Polyline polyline = mTaskPolylineMap.get(task);
+            polyline.setColor(Color.RED);
+        }
     }
 
-    GoogleMap getMap(){
+    public void clearRoute(){
+        //TODO: ref
+    }
+
+    public GoogleMap getMap(){
         return mMap;
     }
+
+    /*
+    PolylineOptions drawRoute(Route route, boolean isActive){
+        PolylineOptions polylineOptions = new PolylineOptions();
+        polylineOptions.geodesic(true);
+        polylineOptions.color(isActive? Color.RED: Color.BLACK);
+
+        for(LatLngAlt latLngAlt: route) {
+            polylineOptions.add(new LatLng(latLngAlt.lat, latLngAlt.lon));
+        }
+        polylineOptions.add(new LatLng(route.get(0).lat, route.get(0).lon));
+
+        return polylineOptions;
+    }
+    */
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -36,9 +82,21 @@ public class MapTools implements OnMapReadyCallback, SwitchButton.OnSwitchListen
         this.mMap = googleMap;
         mMap.setMyLocationEnabled(true);
         mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        mMap.getUiSettings().setMapToolbarEnabled(false);
         LatLng spb = new LatLng(59.9024, 30.2622);
+        //LatLng spb2 = new LatLng(59.9013, 30.2613);
         //mMap.addMarker(new MarkerOptions().position(spb).title("Marker in SPb"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(spb, 15));
+
+        /*
+        PolylineOptions polylineOptions = new PolylineOptions().
+                geodesic(true).
+                color(Color.RED).
+                add(spb).
+                add(spb2);
+        Polyline polyline = mMap.addPolyline(polylineOptions);
+        polyline.setColor(Color.BLUE);
+        */
     }
 
     @Override
@@ -51,7 +109,12 @@ public class MapTools implements OnMapReadyCallback, SwitchButton.OnSwitchListen
                 Log.i(LOGNAME, String.valueOf(latLng));
                 if(mCurrentTask != null){
                     mCurrentTask.addWaypoint(
-                            new LatLngAlt(latLng.latitude, latLng.longitude, 10));
+                            new LatLngAlt(latLng.latitude, latLng.longitude, 20));
+
+                    Polyline polyline = mTaskPolylineMap.get(mCurrentTask);
+                    List<LatLng> points = polyline.getPoints();
+                    points.add(latLng);
+                    polyline.setPoints(points);
                 }
             }
         });
@@ -67,4 +130,7 @@ public class MapTools implements OnMapReadyCallback, SwitchButton.OnSwitchListen
     private static String LOGNAME = "MapTools";
     private GoogleMap mMap;
     private Task mCurrentTask;
+    private TaskPolylineMap mTaskPolylineMap;
 }
+
+class TaskPolylineMap extends HashMap<Task, Polyline> {}

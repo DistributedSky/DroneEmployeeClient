@@ -1,4 +1,4 @@
-package com.simon.droneemployeeclient.droneflat;
+package com.simon.droneemployeeclient.droneemployee;
 
 import java.util.ArrayList;
 

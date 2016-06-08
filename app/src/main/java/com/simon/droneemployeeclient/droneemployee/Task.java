@@ -1,4 +1,4 @@
-package com.simon.droneemployeeclient.droneflat;
+package com.simon.droneemployeeclient.droneemployee;
 
 /**
  * Created by simon on 06.06.16.
