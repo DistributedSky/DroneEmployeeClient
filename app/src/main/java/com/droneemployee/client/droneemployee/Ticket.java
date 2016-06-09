@@ -4,24 +4,24 @@ package com.droneemployee.client.droneemployee;
  * Created by simon on 06.06.16.
  */
 public class Ticket {
+    private Drone drone;
+    private String id;
+
     public Ticket(Drone drone, String id){
-        mDrone = drone;
-        mId = id;
+        this.drone = drone;
+        this.id = id;
     }
 
     public Drone getDrone() {
-        return mDrone;
+        return drone;
     }
 
     public String getId() {
-        return mId;
+        return id;
     }
 
     @Override
     public String toString(){
         return String.valueOf(this);
     }
-
-    private Drone mDrone;
-    private String mId;
 }

@@ -20,101 +20,58 @@ import java.util.List;
 /**
  * Created by simon on 06.06.16.
  */
-public class MapTools implements OnMapReadyCallback, SwitchButton.OnSwitchListener {
+public class MapTools implements
+        OnMapReadyCallback,
+        SwitchButton.OnSwitchListener,
+        TaskDataMediator.ChangeCurrentTaskObserver,
+        TaskDataMediator.AddRouteWaypointObserver,
+        TaskDataMediator.ChangeRouteWaypointObserver,
+        TaskDataMediator.LoadNewTaskObserver,
+        TaskDataMediator.UploadTasksObserver
+{
+    private static String LOGNAME = "MapTools";
+
+    private GoogleMap map;
+    private Task currentTask;
+    private TaskPolylineMap taskPolylineMap;
+
+    private TaskDataMediator taskDataMediator;
+
     public MapTools(SupportMapFragment mapFragment) {
         Log.i(LOGNAME, "IN MapTools()");
         mapFragment.getMapAsync(this);
-        mCurrentTask = null;
-        mTaskPolylineMap = new TaskPolylineMap();
-    }
-
-    public void setCurrentTask(Task task){
-        if(mCurrentTask != null){
-            mTaskPolylineMap.get(mCurrentTask).setColor(Color.BLACK);
-        }
-        if(task == null){
-            mCurrentTask = null;
-            return;
-        }
-        mCurrentTask = task;
-        if(!mTaskPolylineMap.containsKey(task)){
-            LatLng latLng = new LatLng(task.getWaypoint(0).lat, task.getWaypoint(0).lon);
-            PolylineOptions polylineOptions = new PolylineOptions();
-            polylineOptions.geodesic(true);
-            polylineOptions.color(Color.RED);
-            polylineOptions.add(latLng);
-            Polyline polyline = mMap.addPolyline(polylineOptions);
-            mTaskPolylineMap.put(task, polyline);
-            mMap.addMarker(new MarkerOptions().
-                    position(latLng));
-        } else {
-            Polyline polyline = mTaskPolylineMap.get(task);
-            polyline.setColor(Color.RED);
-        }
-    }
-
-    public void clearRoute(){
-        //TODO: ref
+        currentTask = null;
+        taskPolylineMap = new TaskPolylineMap();
     }
 
     public GoogleMap getMap(){
-        return mMap;
+        return map;
     }
-
-    /*
-    PolylineOptions drawRoute(Route route, boolean isActive){
-        PolylineOptions polylineOptions = new PolylineOptions();
-        polylineOptions.geodesic(true);
-        polylineOptions.color(isActive? Color.RED: Color.BLACK);
-
-        for(LatLngAlt latLngAlt: route) {
-            polylineOptions.add(new LatLng(latLngAlt.lat, latLngAlt.lon));
-        }
-        polylineOptions.add(new LatLng(route.get(0).lat, route.get(0).lon));
-
-        return polylineOptions;
-    }
-    */
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         Log.i(LOGNAME, "IN onMapReady");
-        this.mMap = googleMap;
-        mMap.setMyLocationEnabled(true);
-        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-        mMap.getUiSettings().setMapToolbarEnabled(false);
+        this.map = googleMap;
+        map.setMyLocationEnabled(true);
+        map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        map.getUiSettings().setMapToolbarEnabled(false);
         LatLng spb = new LatLng(59.9024, 30.2622);
-        //LatLng spb2 = new LatLng(59.9013, 30.2613);
-        //mMap.addMarker(new MarkerOptions().position(spb).title("Marker in SPb"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(spb, 15));
-
-        /*
-        PolylineOptions polylineOptions = new PolylineOptions().
-                geodesic(true).
-                color(Color.RED).
-                add(spb).
-                add(spb2);
-        Polyline polyline = mMap.addPolyline(polylineOptions);
-        polyline.setColor(Color.BLUE);
-        */
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(spb, 15));
     }
 
     @Override
     public void switchOn() {
         Log.i(LOGNAME, "switchOn");
 
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+        map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
+                //TODO: this method
                 Log.i(LOGNAME, String.valueOf(latLng));
-                if(mCurrentTask != null){
-                    mCurrentTask.addWaypoint(
-                            new LatLngAlt(latLng.latitude, latLng.longitude, 20));
-
-                    Polyline polyline = mTaskPolylineMap.get(mCurrentTask);
-                    List<LatLng> points = polyline.getPoints();
-                    points.add(latLng);
-                    polyline.setPoints(points);
+                if(currentTask != null){
+                    LatLngAlt waypoint = new LatLngAlt(latLng.latitude, latLng.longitude, 20);
+                    Log.i(LOGNAME, "IN onMapClick: waypoint: " + waypoint);
+                    taskDataMediator.addRouteWaypoint(currentTask, waypoint);
                 }
             }
         });
@@ -124,13 +81,63 @@ public class MapTools implements OnMapReadyCallback, SwitchButton.OnSwitchListen
     public void switchOff() {
         Log.i(LOGNAME, "switchOff");
 
-        mMap.setOnMapClickListener(null);
+        map.setOnMapClickListener(null);
     }
 
-    private static String LOGNAME = "MapTools";
-    private GoogleMap mMap;
-    private Task mCurrentTask;
-    private TaskPolylineMap mTaskPolylineMap;
+    @Override
+    public void updateCurrentTask(Task task) {
+        Log.i(LOGNAME, "In updateCurrentTask: task: " + task);
+        if(currentTask != null){
+            taskPolylineMap.get(currentTask).setColor(Color.BLACK);
+        }
+        if(task == null){
+            currentTask = null;
+            return;
+        }
+        currentTask = task;
+        Polyline polyline = taskPolylineMap.get(task);
+        polyline.setColor(Color.RED);
+    }
+
+    @Override
+    public void updateAddRouteWaypoint(Task task, LatLngAlt newLatLngAlt){
+        //TODO: this method
+        Log.i(LOGNAME, "IN updateAddRouteWaypoint");
+        Polyline polyline = taskPolylineMap.get(task);
+        List<LatLng> points = polyline.getPoints();
+        points.add(new LatLng(newLatLngAlt.lat, newLatLngAlt.lon));
+        polyline.setPoints(points);
+    }
+
+    public void setTaskDataMediator(TaskDataMediator taskDataMediator) {
+        this.taskDataMediator = taskDataMediator;
+    }
+
+    @Override
+    public void updateRouteWaypoint(Task task, int waypointIndex, LatLngAlt newLatLngAlt) {
+        Log.i(LOGNAME, "IN updateRouteWaypoint: task: " + task +
+                " latLngAlt: " + waypointIndex + " newLatLngAlt: " + newLatLngAlt);
+    }
+
+    @Override
+    public void updateLoadNewTask(Task task) {
+        LatLng latLng = new LatLng(task.getWaypoint(0).lat, task.getWaypoint(0).lon);
+        PolylineOptions polylineOptions = new PolylineOptions();
+        polylineOptions.geodesic(true);
+        polylineOptions.color(Color.BLACK);
+        polylineOptions.add(latLng);
+        Polyline polyline = map.addPolyline(polylineOptions);
+        taskPolylineMap.put(task, polyline);
+        map.addMarker(new MarkerOptions().position(latLng));
+    }
+
+    @Override
+    public void updateUploadTasks() {
+        for (Polyline polyline : taskPolylineMap.values()) {
+            polyline.remove();
+        }
+        taskPolylineMap = new TaskPolylineMap();
+    }
 }
 
 class TaskPolylineMap extends HashMap<Task, Polyline> {}

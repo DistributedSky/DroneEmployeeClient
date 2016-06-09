@@ -1,6 +1,10 @@
 package com.droneemployee.client.droneemployee;
 
 public class Drone {
+    private String address;
+    private State state;
+    private LatLngAlt lastPosition;
+
 	public enum State { AVAILABLE, BUSY }
 
     public Drone(String address) {
@@ -8,30 +12,26 @@ public class Drone {
     }
 
     public Drone(String address, State state, LatLngAlt lastPosition){
-		mAddress = address;
-        mState = state;
-        mLastPosition = lastPosition;
+		this.address = address;
+        this.state = state;
+        this.lastPosition = lastPosition;
 	}
 
     public String getAddress() {
-        return mAddress;
+        return address;
     }
 
     public State getState() {
-        return mState;
+        return state;
     }
 
     public LatLngAlt getLastPosition(){
-        return mLastPosition;
+        return lastPosition;
     }
 
 	@Override
 	public String toString(){
-        return "Drone(" + mAddress + ", " + mState + ", " +
-                (mLastPosition != null? mLastPosition: "null") + ")";
+        return "Drone(" + address + ", " + state + ", " +
+                (lastPosition != null? lastPosition : "null") + ")";
 	}
-
-	private String mAddress;
-    private State mState;
-    private LatLngAlt mLastPosition;
 }

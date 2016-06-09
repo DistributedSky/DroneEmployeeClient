@@ -6,6 +6,8 @@ import android.util.Log;
  * Created by simon on 06.06.16.
  */
 public class DroneEmployeeBase {
+    private static String LOG = "DroneEmployeeBase";
+
     public DroneEmployeeBase(){}
 
     public DroneList loadAvailableDrones(){
@@ -32,6 +34,4 @@ public class DroneEmployeeBase {
     private String genirateHexRandomString(){
         return Integer.toHexString((int) (Math.random() * 15728639 + 1048576)).toUpperCase();
     }
-
-    private static String LOG = "DroneEmployeeBase";
 }
