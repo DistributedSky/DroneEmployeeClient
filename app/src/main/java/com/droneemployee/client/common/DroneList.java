@@ -1,4 +1,4 @@
-package com.droneemployee.client.droneemployee;
+package com.droneemployee.client.common;
 
 import java.util.ArrayList;
 
@@ -7,7 +7,7 @@ import java.util.ArrayList;
  */
 public class DroneList extends ArrayList<Drone> {
     public ArrayList<String> getAllId(){
-        ArrayList<String> allId = new ArrayList<String>();
+        ArrayList<String> allId = new ArrayList<>();
         for(Drone drone: this){
             allId.add(drone.getAddress());
         }

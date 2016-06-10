@@ -16,27 +16,30 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.android.gms.maps.SupportMapFragment;
-import com.droneemployee.client.droneemployee.Drone;
-import com.droneemployee.client.droneemployee.DroneList;
-import com.droneemployee.client.droneemployee.DroneEmployeeBase;
-import com.droneemployee.client.droneemployee.Task;
+import com.droneemployee.client.common.Drone;
+import com.droneemployee.client.common.DroneList;
+import com.droneemployee.client.common.DroneEmployeeBase;
+import com.droneemployee.client.common.Task;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private static final String LOGNAME = "MainActivity";
+
     private Menu sideMenu;
-    private FragmentManager fragmentManager;
     private MapTools mapTools;
     private DroneEmployeeBase droneEmployeeBase;
     private DroneList availableDrones;
-    private ItemIdTaskMap itemIdTaskMap;
     private SwitchButton switchButton;
 
-    private TaskDataMediator taskDataMediator;
-    private TaskData taskData;
+    private HashMap<Integer, Integer> taskIndexItemIdMap;
+    private int itemIndex;
+
+    private SharedTaskList sharedTaskList;
+    private SharedTaskIndex sharedTaskIndex;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +49,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         //Fragment manager initialize
-        this.fragmentManager = getSupportFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
 
         //MapTools initialize
         this.mapTools = new MapTools((SupportMapFragment) fragmentManager.
@@ -55,7 +58,8 @@ public class MainActivity extends AppCompatActivity
         //Employee initialize
         this.droneEmployeeBase = new DroneEmployeeBase();
         this.availableDrones = droneEmployeeBase.loadAvailableDrones();
-        this.itemIdTaskMap = new ItemIdTaskMap();
+        this.taskIndexItemIdMap = new HashMap<>();
+        this.itemIndex = SharedTaskIndex.NOTSET;
 
         //Toolbar initialize
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -84,19 +88,11 @@ public class MainActivity extends AppCompatActivity
         this.sideMenu = navigationView.getMenu();
 
         //===
-        taskData = new TaskData(droneEmployeeBase);
-        //===
-        this.taskDataMediator = new TaskDataMediator();
-        taskDataMediator.registerObserver((TaskDataMediator.ChangeCurrentTaskObserver) mapTools);
-        taskDataMediator.registerObserver((TaskDataMediator.AddRouteWaypointObserver) mapTools);
-        taskDataMediator.registerObserver((TaskDataMediator.ChangeRouteWaypointObserver) mapTools);
-        taskDataMediator.registerObserver((TaskDataMediator.LoadNewTaskObserver) mapTools);
-        taskDataMediator.registerObserver((TaskDataMediator.UploadTasksObserver) mapTools);
-        taskDataMediator.registerObserver(switchButton);
-        taskDataMediator.registerObserver((TaskDataMediator.AddRouteWaypointObserver) taskData);
-        taskDataMediator.registerObserver((TaskDataMediator.ChangeRouteWaypointObserver) taskData);
-        taskDataMediator.registerObserver((TaskDataMediator.LoadNewTaskObserver) taskData);
-        taskDataMediator.registerObserver((TaskDataMediator.UploadTasksObserver) taskData);
+        this.sharedTaskList = new SharedTaskList();
+        this.sharedTaskIndex = new SharedTaskIndex();
+        sharedTaskList.addObserver(mapTools);
+        sharedTaskIndex.addObserver(mapTools);
+        sharedTaskIndex.addObserver(switchButton);
     }
 
     @Override
@@ -132,15 +128,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_settings) {
             return true;
         } else if (id == R.id.action_send_tasks){
-            for(Task task: itemIdTaskMap.values()){
-                droneEmployeeBase.sendTask(task);
-            }
-            for(int key: itemIdTaskMap.keySet()){
-                sideMenu.removeItem(key);
-            }
-            mapTools.getMap().clear();
-            taskDataMediator.changeCurrentTask(null);
-            itemIdTaskMap = new ItemIdTaskMap();
+            Log.i(LOGNAME, "UPLOAD ALL TASKS!");
         }
 
         return super.onOptionsItemSelected(item);
@@ -151,10 +139,10 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        Log.i("LOGINFO", "IN onNavigationItemSelected ID: " + id);
+        Log.i(LOGNAME, "IN onNavigationItemSelected ID: " + id);
 
         if (id == R.id.nav_buy) {
-            Log.i("LOGINFO", "Select nav_buy");
+            Log.i(LOGNAME, "Select nav_buy");
             switchButton.off();
             ArrayList<String> allId = availableDrones.getAllId();
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -164,23 +152,25 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     Drone drone = availableDrones.get(which);
-                    Log.i("LOGINFO", String.valueOf(drone));
+                    Log.i(LOGNAME, "Select: " + String.valueOf(drone));
 
                     Task task = new Task(droneEmployeeBase.byTicket(drone));
-                    taskDataMediator.loadNewTask(task);
-                    taskDataMediator.changeCurrentTask(task);
+                    sharedTaskList.loadTask(task);
+                    itemIndex++;
+                    sharedTaskIndex.updateCurrentTask(itemIndex);
 
-                    MenuItem menuItem = sideMenu.add(0, drone.hashCode(), 0, drone.getAddress());
-                    itemIdTaskMap.put(menuItem.getItemId(), task);
+                    sideMenu.add(0, drone.hashCode(), 0, drone.getAddress());
+                    taskIndexItemIdMap.put(drone.hashCode(), itemIndex);
+
                     availableDrones.remove(which);
                 }
             });
             builder.show();
             return true;
-        } else if (itemIdTaskMap.containsKey(id)) {
-            Task task = itemIdTaskMap.get(id);
-            Log.i("LOGINFO", "Select TASK: " + task);
-            taskDataMediator.changeCurrentTask(task);
+        } else if (taskIndexItemIdMap.containsKey(id)) {
+            int taskIndex = taskIndexItemIdMap.get(id);
+            Log.i(LOGNAME, "Select TASK_INDEX: " + taskIndex);
+            sharedTaskIndex.updateCurrentTask(taskIndex);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

@@ -1,10 +1,10 @@
 package com.droneemployee.client;
 
-import com.droneemployee.client.droneemployee.Drone;
-import com.droneemployee.client.droneemployee.DroneList;
-import com.droneemployee.client.droneemployee.DroneEmployeeBase;
-import com.droneemployee.client.droneemployee.LatLngAlt;
-import com.droneemployee.client.droneemployee.Task;
+import com.droneemployee.client.common.Drone;
+import com.droneemployee.client.common.DroneList;
+import com.droneemployee.client.common.DroneEmployeeBase;
+import com.droneemployee.client.common.LatLngAlt;
+import com.droneemployee.client.common.Task;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,26 +50,5 @@ public class LibraryDroneTest {
             task.addWaypoint(new LatLngAlt(59.901743, 30.258366, 10));
             taskList.add(task);
         }
-
-        class TestChangeCurrentObserver implements TaskDataMediator.ChangeCurrentTaskObserver {
-            private TaskDataMediator taskData;
-
-            public void setTaskDataMediator(TaskDataMediator taskData) {
-                this.taskData = taskData;
-            }
-
-            @Override
-            public void updateCurrentTask(Task task) {
-                System.out.println("Task: " + task);
-            }
-        }
-
-        TestChangeCurrentObserver observer = new TestChangeCurrentObserver();
-        TaskDataMediator taskDataMediator = new TaskDataMediator();
-        taskDataMediator.registerObserver(observer);
-        taskDataMediator.changeCurrentTask(taskList.get(0));
-        taskDataMediator.changeCurrentTask(taskList.get(1));
-        taskDataMediator.changeRouteWaypoint(taskList.get(0), 0,
-                new LatLngAlt(1, 1, 1));
     }
 }

@@ -1,4 +1,4 @@
-package com.droneemployee.client.droneemployee;
+package com.droneemployee.client.common;
 
 /**
  * Created by simon on 06.06.16.
@@ -27,6 +27,10 @@ public class Task {
 
     public int size(){
         return route.size();
+    }
+
+    public String getDroneAdress() {
+        return drone.getAddress();
     }
 
     @Override

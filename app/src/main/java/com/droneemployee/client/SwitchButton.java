@@ -5,7 +5,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.droneemployee.client.droneemployee.Task;
+import com.droneemployee.client.common.Task;
 
 /**
  * Created by simon on 07.06.16.
@@ -13,21 +13,21 @@ import com.droneemployee.client.droneemployee.Task;
 
 public class SwitchButton implements
         View.OnClickListener,
-        TaskDataMediator.ChangeCurrentTaskObserver
+        SharedTaskIndex.Observer
 {
     public interface OnSwitchListener{
+
         void switchOn();
         void switchOff();
     }
-
     private static String LOGNAME = "SwitchButton";
 
     private final Drawable firstImage;
+
     private final Drawable secondImage;
     private final OnSwitchListener listener;
     private boolean flag = false;
     private ImageView imageView;
-
     public SwitchButton(ImageView imageView, Drawable firstImage, Drawable secondImage,
                         OnSwitchListener onSwitchListener){
         this.firstImage = firstImage;
@@ -66,10 +66,11 @@ public class SwitchButton implements
     }
 
     @Override
-    public void updateCurrentTask(Task task) {
-        Log.i(LOGNAME, "In updateCurrentTask: task: " + task);
+    public void setSharedCurrentTask(SharedTaskIndex sharedTaskIndex) {}
+
+    @Override
+    public void updateCurrentTask(int taskIndex) {
+        Log.i(LOGNAME, "In updateCurrentTask: taskIndex: " + taskIndex);
         this.off();
     }
-
-    public void setTaskDataMediator(TaskDataMediator taskDataMediator) {}
 }
