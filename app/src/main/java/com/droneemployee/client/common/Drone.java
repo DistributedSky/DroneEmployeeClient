@@ -1,4 +1,4 @@
-package com.droneemployee.client.droneemployee;
+package com.droneemployee.client.common;
 
 public class Drone {
 	public enum State { AVAILABLE, BUSY }

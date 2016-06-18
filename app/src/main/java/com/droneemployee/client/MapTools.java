@@ -11,8 +11,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.droneemployee.client.droneemployee.Coordinate;
-import com.droneemployee.client.droneemployee.Task;
+import com.droneemployee.client.common.Coordinate;
+import com.droneemployee.client.common.Task;
 
 import java.util.HashMap;
 import java.util.List;

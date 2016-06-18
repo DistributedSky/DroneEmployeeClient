@@ -1,4 +1,4 @@
-package com.droneemployee.client.droneemployee;
+package com.droneemployee.client.common;
 
 /**
  * Created by simon on 06.06.16.

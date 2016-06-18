@@ -15,11 +15,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.droneemployee.client.droneemployee.DroneEmployeeFetcher;
+import com.droneemployee.client.common.DroneEmployeeFetcher;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.droneemployee.client.droneemployee.Drone;
-import com.droneemployee.client.droneemployee.DroneATC;
-import com.droneemployee.client.droneemployee.Task;
+import com.droneemployee.client.common.Drone;
+import com.droneemployee.client.common.DroneATC;
+import com.droneemployee.client.common.Task;
 
 import java.util.List;
 

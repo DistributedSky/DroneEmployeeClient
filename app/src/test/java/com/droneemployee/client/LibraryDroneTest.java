@@ -1,10 +1,10 @@
 package com.droneemployee.client;
 
-import com.droneemployee.client.droneemployee.Coordinate;
-import com.droneemployee.client.droneemployee.Drone;
-import com.droneemployee.client.droneemployee.DroneEmployeeFetcher;
-import com.droneemployee.client.droneemployee.DroneATC;
-import com.droneemployee.client.droneemployee.Task;
+import com.droneemployee.client.common.Coordinate;
+import com.droneemployee.client.common.Drone;
+import com.droneemployee.client.common.DroneEmployeeFetcher;
+import com.droneemployee.client.common.DroneATC;
+import com.droneemployee.client.common.Task;
 
 /**
  * To work on unit tests, switch the LibraryDroneTest Artifact in the Build Variants view.
