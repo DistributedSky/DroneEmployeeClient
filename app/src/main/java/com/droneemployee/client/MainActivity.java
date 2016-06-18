@@ -15,14 +15,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.droneemployee.client.common.DroneATC;
+import com.droneemployee.client.common.DroneEmployeeFetcher;
+import com.droneemployee.client.common.Task;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.droneemployee.client.common.Drone;
-import com.droneemployee.client.common.DroneList;
-import com.droneemployee.client.common.DroneEmployeeBase;
-import com.droneemployee.client.common.Task;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -31,8 +31,8 @@ public class MainActivity extends AppCompatActivity
 
     private Menu sideMenu;
     private MapTools mapTools;
-    private DroneEmployeeBase droneEmployeeBase;
-    private DroneList availableDrones;
+    private DroneEmployeeFetcher droneEmployeeFetcher;
+    private DroneATC droneAtc;
     private SwitchButton switchButton;
 
     private HashMap<Integer, Integer> taskIndexItemIdMap;
@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity
 
     private SharedTaskList sharedTaskList;
     private SharedTaskIndex sharedTaskIndex;
+    private ItemIdTaskMap itemIdTaskMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,10 +57,11 @@ public class MainActivity extends AppCompatActivity
                 findFragmentById(R.id.location_map));
 
         //Employee initialize
-        this.droneEmployeeBase = new DroneEmployeeBase();
-        this.availableDrones = droneEmployeeBase.loadAvailableDrones();
+        this.droneEmployeeFetcher = new DroneEmployeeFetcher();
+        this.droneAtc = droneEmployeeFetcher.fetchData();
         this.taskIndexItemIdMap = new HashMap<>();
         this.itemIndex = SharedTaskIndex.NOTSET;
+        this.itemIdTaskMap = new ItemIdTaskMap();
 
         //Toolbar initialize
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -109,11 +111,6 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-        /*
-        for(Drone drone: availableDrones){
-            menu.add(drone.getAddress());
-        }
-        */
         return true;
     }
 
@@ -144,17 +141,17 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_buy) {
             Log.i(LOGNAME, "Select nav_buy");
             switchButton.off();
-            ArrayList<String> allId = availableDrones.getAllId();
+            List<String> allId = droneAtc.getDronesIds();
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Available DRONES:");
             builder.setItems(allId.toArray(new String[allId.size()]),
                     new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    Drone drone = availableDrones.get(which);
+                    Drone drone = droneAtc.getDrones().get(which);
                     Log.i(LOGNAME, "Select: " + String.valueOf(drone));
 
-                    Task task = new Task(droneEmployeeBase.byTicket(drone));
+                    Task task = new Task(droneEmployeeFetcher.byTicket(drone));
                     sharedTaskList.loadTask(task);
                     itemIndex++;
                     sharedTaskIndex.updateCurrentTask(itemIndex);
@@ -162,7 +159,7 @@ public class MainActivity extends AppCompatActivity
                     sideMenu.add(0, drone.hashCode(), 0, drone.getAddress());
                     taskIndexItemIdMap.put(drone.hashCode(), itemIndex);
 
-                    availableDrones.remove(which);
+                    droneAtc.getDrones().remove(which);
                 }
             });
             builder.show();

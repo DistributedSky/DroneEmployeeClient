@@ -1,13 +1,15 @@
 package com.droneemployee.client;
 
+
+import com.droneemployee.client.common.Coordinate;
 import com.droneemployee.client.common.Drone;
-import com.droneemployee.client.common.DroneList;
-import com.droneemployee.client.common.DroneEmployeeBase;
-import com.droneemployee.client.common.LatLngAlt;
+import com.droneemployee.client.common.DroneEmployeeFetcher;
+import com.droneemployee.client.common.DroneATC;
 import com.droneemployee.client.common.Task;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * To work on unit tests, switch the LibraryDroneTest Artifact in the Build Variants view.
@@ -15,39 +17,39 @@ import java.util.List;
 public class LibraryDroneTest {
     @org.junit.Test
     public void addition_isCorrect() throws Exception {
-        LatLngAlt latLngAlt = new LatLngAlt(10, 20, 30);
-        System.out.println("latLngAlt: " + latLngAlt);
+        Coordinate coordinate = new Coordinate(10, 20, 30);
+        System.out.println("coordinate: " + coordinate);
 
-        Drone drone = new Drone("asdf", Drone.State.AVAILABLE, latLngAlt);
+        Drone drone = new Drone("asdf", coordinate, Drone.State.AVAILABLE);
         System.out.println(drone);
     }
 
     @org.junit.Test
     public void droneEmployeeBaseTest() throws Exception {
-        DroneEmployeeBase deb = new DroneEmployeeBase();
-        DroneList droneBase = deb.loadAvailableDrones();
-        System.out.println(droneBase);
+        DroneEmployeeFetcher deb = new DroneEmployeeFetcher();
+        DroneATC droneATC = deb.fetchData();
+        System.out.println(droneATC);
 
-        Drone drone = droneBase.get(2);
+        Drone drone = droneATC.getDrones().get(2);
         Task task = new Task(deb.byTicket(drone));
-        task.addWaypoint(new LatLngAlt(59.905653, 30.259567, 10));
-        task.addWaypoint(new LatLngAlt(59.901743, 30.258366, 10));
+        task.addWaypoint(new Coordinate(59.905653, 30.259567, 10));
+        task.addWaypoint(new Coordinate(59.901743, 30.258366, 10));
 
         deb.sendTask(task);
     }
 
     @org.junit.Test
     public void taskDataTest() throws Exception {
-        DroneEmployeeBase deb = new DroneEmployeeBase();
-        DroneList droneBase = deb.loadAvailableDrones();
+        DroneEmployeeFetcher deb = new DroneEmployeeFetcher();
+        DroneATC droneBase = deb.fetchData();
         System.out.println(droneBase);
 
         final List<Task> taskList = new ArrayList<>();
 
-        for (Drone drone : droneBase) {
+        for (Drone drone : droneBase.getDrones()) {
             Task task = new Task(deb.byTicket(drone));
-            task.addWaypoint(new LatLngAlt(59.905653, 30.259567, 10));
-            task.addWaypoint(new LatLngAlt(59.901743, 30.258366, 10));
+            task.addWaypoint(new Coordinate(59.905653, 30.259567, 10));
+            task.addWaypoint(new Coordinate(59.901743, 30.258366, 10));
             taskList.add(task);
         }
     }

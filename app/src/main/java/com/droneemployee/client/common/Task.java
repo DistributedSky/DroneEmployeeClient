@@ -4,42 +4,39 @@ package com.droneemployee.client.common;
  * Created by simon on 06.06.16.
  */
 public class Task {
-    private Drone drone;
-    private Route route;
+    private Drone mDrone;
+    private Route mRoute;
+    private String mDroneAdress;
 
     public Task(Ticket ticket){
-        drone = ticket.getDrone();
-        route = new Route();
-        route.add(drone.getLastPosition());
+        mDrone = ticket.getDrone();
+        mDroneAdress = ticket.getDrone().getAddress();
+        mRoute = new Route();
     }
 
-    public void addWaypoint(LatLngAlt waypoint){
-        route.add(waypoint);
+    public void addWaypoint(Coordinate waypoint){
+        mRoute.add(waypoint);
     }
 
-    public LatLngAlt getWaypoint(int i){
-        return route.get(i);
+    public Coordinate getWaypoint(int i){
+        return mRoute.get(i);
     }
 
-    public void setWaypoint(int i, LatLngAlt latLngAlt){
-        route.set(i, latLngAlt);
-    }
-
-    public int size(){
-        return route.size();
-    }
-
-    public String getDroneAdress() {
-        return drone.getAddress();
+    public Coordinate setWaypoint(int i, Coordinate coordinate){
+        return mRoute.set(i, coordinate);
     }
 
     @Override
     public String toString(){
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append("Task(");
-        stringBuffer.append("drone=" + drone);
-        stringBuffer.append(", route=" + route);
+        stringBuffer.append("drone=" + mDrone);
+        stringBuffer.append(", route=" + mRoute);
         stringBuffer.append(")");
         return stringBuffer.toString();
+    }
+
+    public String getDroneAdress() {
+        return mDroneAdress;
     }
 }

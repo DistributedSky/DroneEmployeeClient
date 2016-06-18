@@ -3,6 +3,8 @@ package com.droneemployee.client;
 import android.graphics.Color;
 import android.util.Log;
 
+import com.droneemployee.client.common.Coordinate;
+import com.droneemployee.client.common.Task;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -11,11 +13,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.droneemployee.client.common.LatLngAlt;
-import com.droneemployee.client.common.Task;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -64,18 +63,18 @@ public class MapTools implements
     }
 
     @Override
-    public void updateAddWaypoint(int taskIndex, LatLngAlt newLatLngAlt) {
+    public void updateAddWaypoint(int taskIndex, Coordinate newCoordinate) {
         Log.i(LOGNAME, "IN updateAddWaypoint");
         Polyline polyline = polylinesForTasks.get(taskIndex);
         List<LatLng> points = polyline.getPoints();
-        points.add(new LatLng(newLatLngAlt.lat, newLatLngAlt.lon));
+        points.add(new LatLng(newCoordinate.lat, newCoordinate.lon));
         polyline.setPoints(points);
     }
 
     @Override
-    public void updateWaypoint(int taskIndex, int waypointIndex, LatLngAlt newLatLngAlt) {
+    public void updateWaypoint(int taskIndex, int waypointIndex, Coordinate newCoordinate) {
         Log.i(LOGNAME, "IN updateRouteWaypoint: taskIndex: " + taskIndex +
-                " waypointIndex: " + waypointIndex + " newLatLngAlt: " + newLatLngAlt);
+                " waypointIndex: " + waypointIndex + " newCoordinate: " + newCoordinate);
     }
 
     @Override
@@ -130,9 +129,10 @@ public class MapTools implements
                 //TODO: this method
                 Log.i(LOGNAME, String.valueOf(latLng));
                 if(currentTaskIndex != SharedTaskIndex.NOTSET){
-                    LatLngAlt waypoint = new LatLngAlt(latLng.latitude, latLng.longitude, 20);
+                    Coordinate waypoint = new Coordinate(latLng.latitude, latLng.longitude, 20);
                     Log.i(LOGNAME, "IN onMapClick: waypoint: " + waypoint);
                     sharedTaskList.addWaypoint(currentTaskIndex, waypoint);
+
                 }
             }
         });
@@ -146,5 +146,3 @@ public class MapTools implements
     }
 
 }
-
-class TaskPolylineMap extends HashMap<Task, Polyline> {}

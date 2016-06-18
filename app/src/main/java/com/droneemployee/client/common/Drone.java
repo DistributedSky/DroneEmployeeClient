@@ -1,37 +1,37 @@
 package com.droneemployee.client.common;
 
 public class Drone {
-    private String address;
-    private State state;
-    private LatLngAlt lastPosition;
-
 	public enum State { AVAILABLE, BUSY }
 
     public Drone(String address) {
-        this(address, State.AVAILABLE, null);
+        this(address, null, State.AVAILABLE);
     }
 
-    public Drone(String address, State state, LatLngAlt lastPosition){
-		this.address = address;
-        this.state = state;
-        this.lastPosition = lastPosition;
+    public Drone(String address, Coordinate lastPosition, State state){
+		mAddress = address;
+        mState = state;
+        mLastPosition = lastPosition;
 	}
 
     public String getAddress() {
-        return address;
+        return mAddress;
     }
 
     public State getState() {
-        return state;
+        return mState;
     }
 
-    public LatLngAlt getLastPosition(){
-        return lastPosition;
+    public Coordinate getLastPosition(){
+        return mLastPosition;
     }
 
 	@Override
 	public String toString(){
-        return "Drone(" + address + ", " + state + ", " +
-                (lastPosition != null? lastPosition : "null") + ")";
+        return "Drone(" + mAddress + ", " + mState + ", " +
+                (mLastPosition != null? mLastPosition: "null") + ")";
 	}
+
+	private String mAddress;
+    private State mState;
+    private Coordinate mLastPosition;
 }

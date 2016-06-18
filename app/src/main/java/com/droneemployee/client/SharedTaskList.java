@@ -1,6 +1,6 @@
 package com.droneemployee.client;
 
-import com.droneemployee.client.common.LatLngAlt;
+import com.droneemployee.client.common.Coordinate;
 import com.droneemployee.client.common.Task;
 
 import java.util.ArrayList;
@@ -13,17 +13,17 @@ import java.util.List;
 public class SharedTaskList {
     public interface Observer{
         void setSharedTaskList(SharedTaskList sharedTaskList);
-        void updateAddWaypoint(int taskIndex, LatLngAlt newLatLngAlt);
-        void updateWaypoint(int taskIndex, int waypointIndex, LatLngAlt newLatLngAlt);
+        void updateAddWaypoint(int taskIndex, Coordinate newCoordinate);
+        void updateWaypoint(int taskIndex, int waypointIndex, Coordinate newCoordinate);
         void updateLoadTask(Task task);
         void updateUploadTasks();
     }
 
-    private TaskList tasks;
+    private List<Task> tasks;
     private List<Observer> observers;
 
     public SharedTaskList(){
-        this.tasks = new TaskList();
+        this.tasks = new ArrayList<>();
         this.observers = new LinkedList<>();
     }
 
@@ -32,15 +32,15 @@ public class SharedTaskList {
         observers.add(observer);
     }
 
-    public void addWaypoint(int taskIndex, LatLngAlt waypoint){
+    public void addWaypoint(int taskIndex, Coordinate waypoint){
         for (Observer observer : observers) {
             observer.updateAddWaypoint(taskIndex, waypoint);
         }
     }
-    public void changeWaypoint(int taskIndex, int waypointIndex, LatLngAlt newLatLngAlt){
+    public void changeWaypoint(int taskIndex, int waypointIndex, Coordinate newCoordinate){
         for (Observer observer : observers) {
-            tasks.get(taskIndex).setWaypoint(waypointIndex, newLatLngAlt);
-            observer.updateWaypoint(taskIndex, waypointIndex, newLatLngAlt);
+            tasks.get(taskIndex).setWaypoint(waypointIndex, newCoordinate);
+            observer.updateWaypoint(taskIndex, waypointIndex, newCoordinate);
         }
     }
     public void loadTask(Task task){
@@ -56,5 +56,3 @@ public class SharedTaskList {
         }
     }
 }
-
-class TaskList extends ArrayList<Task> {}
