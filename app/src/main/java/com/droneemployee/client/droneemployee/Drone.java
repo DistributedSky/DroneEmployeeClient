@@ -4,10 +4,10 @@ public class Drone {
 	public enum State { AVAILABLE, BUSY }
 
     public Drone(String address) {
-        this(address, State.AVAILABLE, null);
+        this(address, null, State.AVAILABLE);
     }
 
-    public Drone(String address, State state, LatLngAlt lastPosition){
+    public Drone(String address, Coordinate lastPosition, State state){
 		mAddress = address;
         mState = state;
         mLastPosition = lastPosition;
@@ -21,7 +21,7 @@ public class Drone {
         return mState;
     }
 
-    public LatLngAlt getLastPosition(){
+    public Coordinate getLastPosition(){
         return mLastPosition;
     }
 
@@ -33,5 +33,5 @@ public class Drone {
 
 	private String mAddress;
     private State mState;
-    private LatLngAlt mLastPosition;
+    private Coordinate mLastPosition;
 }

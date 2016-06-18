@@ -1,21 +1,25 @@
 package com.droneemployee.client.droneemployee;
 
-public class LatLngAlt {
-	public LatLngAlt(){
+public class Coordinate {
+	public Coordinate(){
 		lat = 0;
 		lon = 0;
 		alt = 0;
 	}
 
-	public LatLngAlt(double lat, double lon, double alt){
+	public Coordinate(double lat, double lon, double alt){
 		this.lat = lat;
 		this.lon = lon;
 		this.alt = alt;
 	}
 
+	public Coordinate(double lat, double lon) {
+        this(lat, lon, 0);
+    }
+
 	@Override
 	public String toString(){
-		return "LatLngAlt(" + lat + ", " + lon + ", " + alt + ")";
+		return "Coordinate(" + lat + ", " + lon + ", " + alt + ")";
 	}
 
 	public double lat;

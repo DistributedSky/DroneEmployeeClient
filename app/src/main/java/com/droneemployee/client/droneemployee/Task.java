@@ -9,11 +9,11 @@ public class Task {
         mRoute = new Route();
     }
 
-    public void addWaypoint(LatLngAlt waypoint){
+    public void addWaypoint(Coordinate waypoint){
         mRoute.add(waypoint);
     }
 
-    public LatLngAlt getWaypoint(int i){
+    public Coordinate getWaypoint(int i){
         return mRoute.get(i);
     }
 

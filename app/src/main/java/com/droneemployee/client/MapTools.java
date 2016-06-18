@@ -11,7 +11,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.droneemployee.client.droneemployee.LatLngAlt;
+import com.droneemployee.client.droneemployee.Coordinate;
 import com.droneemployee.client.droneemployee.Task;
 
 import java.util.HashMap;
@@ -21,6 +21,7 @@ import java.util.List;
  * Created by simon on 06.06.16.
  */
 public class MapTools implements OnMapReadyCallback, SwitchButton.OnSwitchListener {
+
     public MapTools(SupportMapFragment mapFragment) {
         Log.i(LOGNAME, "IN MapTools()");
         mapFragment.getMapAsync(this);
@@ -67,7 +68,7 @@ public class MapTools implements OnMapReadyCallback, SwitchButton.OnSwitchListen
         polylineOptions.geodesic(true);
         polylineOptions.color(isActive? Color.RED: Color.BLACK);
 
-        for(LatLngAlt latLngAlt: route) {
+        for(Coordinate latLngAlt: route) {
             polylineOptions.add(new LatLng(latLngAlt.lat, latLngAlt.lon));
         }
         polylineOptions.add(new LatLng(route.get(0).lat, route.get(0).lon));
@@ -109,7 +110,7 @@ public class MapTools implements OnMapReadyCallback, SwitchButton.OnSwitchListen
                 Log.i(LOGNAME, String.valueOf(latLng));
                 if(mCurrentTask != null){
                     mCurrentTask.addWaypoint(
-                            new LatLngAlt(latLng.latitude, latLng.longitude, 20));
+                            new Coordinate(latLng.latitude, latLng.longitude, 20));
 
                     Polyline polyline = mTaskPolylineMap.get(mCurrentTask);
                     List<LatLng> points = polyline.getPoints();

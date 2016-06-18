@@ -15,13 +15,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.droneemployee.client.droneemployee.DroneEmployeeFetcher;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.droneemployee.client.droneemployee.Drone;
-import com.droneemployee.client.droneemployee.DroneList;
-import com.droneemployee.client.droneemployee.DroneEmployeeBase;
+import com.droneemployee.client.droneemployee.DroneATC;
 import com.droneemployee.client.droneemployee.Task;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -29,10 +29,9 @@ public class MainActivity extends AppCompatActivity
     private Menu mSideMenu;
     private FragmentManager mFragmentManager;
     private MapTools mMapTools;
-    private DroneEmployeeBase mDroneEmployeeBase;
-    private DroneList mAvailableDrones;
+    private DroneEmployeeFetcher mDroneEmployeeFetcher;
+    private DroneATC mDroneAtc;
     private ItemIdTaskMap mItemIdTaskMap;
-    private Task mCurrentTask;
     private SwitchButton mSwitchButton;
 
     @Override
@@ -49,10 +48,9 @@ public class MainActivity extends AppCompatActivity
                 findFragmentById(R.id.location_map));
 
         //Employee initialize
-        mDroneEmployeeBase = new DroneEmployeeBase();
-        mAvailableDrones = mDroneEmployeeBase.loadAvailableDrones();
+        mDroneEmployeeFetcher = new DroneEmployeeFetcher();
+        mDroneAtc = mDroneEmployeeFetcher.fetchData();
         mItemIdTaskMap = new ItemIdTaskMap();
-        mCurrentTask = null;
 
         //Toolbar initialize
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -95,11 +93,6 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-        /*
-        for(Drone drone: mAvailableDrones){
-            menu.add(drone.getAddress());
-        }
-        */
         return true;
     }
 
@@ -115,7 +108,7 @@ public class MainActivity extends AppCompatActivity
             return true;
         } else if (id == R.id.action_send_tasks){
             for(Task task: mItemIdTaskMap.values()){
-                mDroneEmployeeBase.sendTask(task);
+                mDroneEmployeeFetcher.sendTask(task);
             }
             for(int key: mItemIdTaskMap.keySet()){
                 mSideMenu.removeItem(key);
@@ -123,7 +116,6 @@ public class MainActivity extends AppCompatActivity
             mMapTools.getMap().clear();
             mMapTools.setCurrentTask(null);
             mItemIdTaskMap = new ItemIdTaskMap();
-            mCurrentTask = null;
         }
 
         return super.onOptionsItemSelected(item);
@@ -139,24 +131,23 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_buy) {
             Log.i("LOGINFO", "Select nav_buy");
             mSwitchButton.off();
-            ArrayList<String> allId = mAvailableDrones.getAllId();
+            List<String> allId = mDroneAtc.getDronesIds();
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Available DRONES:");
             builder.setItems(allId.toArray(new String[allId.size()]),
                     new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    Drone drone = mAvailableDrones.get(which);
+                    Drone drone = mDroneAtc.getDrones().get(which);
                     Log.i("LOGINFO", String.valueOf(drone));
 
-                    Task task = new Task(mDroneEmployeeBase.byTicket(drone));
+                    Task task = new Task(mDroneEmployeeFetcher.byTicket(drone));
                     task.addWaypoint(drone.getLastPosition());
-                    mCurrentTask = task;
                     mMapTools.setCurrentTask(task);
 
                     MenuItem menuItem = mSideMenu.add(0, drone.hashCode(), 0, drone.getAddress());
                     mItemIdTaskMap.put(menuItem.getItemId(), task);
-                    mAvailableDrones.remove(which);
+                    mDroneAtc.getDrones().remove(which);
                 }
             });
             builder.show();
@@ -164,7 +155,6 @@ public class MainActivity extends AppCompatActivity
         } else if (mItemIdTaskMap.containsKey(id)) {
             Task task = mItemIdTaskMap.get(id);
             Log.i("LOGINFO", "Select TASK: " + task);
-            mCurrentTask = task;
             mMapTools.setCurrentTask(task);
             mSwitchButton.off();
         }
