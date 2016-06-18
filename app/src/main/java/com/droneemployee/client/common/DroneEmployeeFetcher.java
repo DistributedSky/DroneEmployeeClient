@@ -1,5 +1,6 @@
 package com.droneemployee.client.common;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 /**
@@ -24,6 +25,12 @@ public class DroneEmployeeFetcher {
         droneATC.getPerimeter().add(new Coordinate(59.899861914715544,30.251800306141376));
         droneATC.getPerimeter().add(new Coordinate(59.90001290883071,30.258453860878944));
 
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        }
+
         return droneATC;
     }
 
@@ -36,6 +43,7 @@ public class DroneEmployeeFetcher {
         Log.i(TAG, "SEND: " + task);
     }
 
+    @NonNull
     private String genirateHexRandomString(){
         return Integer.toHexString((int) (Math.random() * 15728639 + 1048576)).toUpperCase();
     }

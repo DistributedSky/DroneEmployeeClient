@@ -38,20 +38,23 @@ public class SharedTaskList {
         }
     }
     public void changeWaypoint(int taskIndex, int waypointIndex, Coordinate newCoordinate){
+        tasks.get(taskIndex).setWaypoint(waypointIndex, newCoordinate);
+
         for (Observer observer : observers) {
-            tasks.get(taskIndex).setWaypoint(waypointIndex, newCoordinate);
             observer.updateWaypoint(taskIndex, waypointIndex, newCoordinate);
         }
     }
     public void loadTask(Task task){
+        tasks.add(task);
+
         for (Observer observer : observers) {
-            tasks.add(task);
             observer.updateLoadTask(task);
         }
     }
     public void uploadTasks(){
+        tasks.clear();
+
         for (Observer observer : observers) {
-            tasks.clear();
             observer.updateUploadTasks();
         }
     }

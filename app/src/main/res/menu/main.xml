@@ -9,6 +9,11 @@
     <item
         android:id="@+id/action_send_tasks"
         android:orderInCategory="90"
-        android:title="@string/send_tasks"
+        android:title="@string/action_send_tasks"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_find_atc"
+        android:orderInCategory="80"
+        android:title="@string/action_find_atc"
         app:showAsAction="never" />
 </menu>

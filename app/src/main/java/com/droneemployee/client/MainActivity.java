@@ -1,9 +1,12 @@
 package com.droneemployee.client;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
@@ -26,6 +29,27 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private class FetchDataTask extends AsyncTask<Void, Void, DroneATC> {
+        private ProgressDialog progressDialog;
+        @Override
+        protected void onPreExecute() {
+            progressDialog = new ProgressDialog(MainActivity.this);
+            progressDialog.setTitle("Search ATC");
+            progressDialog.setMessage("Please, wait...");
+            progressDialog.show();
+        }
+        @Override
+        protected DroneATC doInBackground(Void... params) {
+            return droneEmployeeFetcher.fetchData();
+        }
+        @Override
+        protected void onPostExecute(DroneATC atc) {
+            droneAtc = atc;
+            mapTools.renderPoligon(droneAtc.getPerimeter());
+            progressDialog.dismiss();
+        }
+    }
 
     private static final String TAG = "MainActivity";
 
@@ -51,15 +75,16 @@ public class MainActivity extends AppCompatActivity
         //Fragment manager initialize
         FragmentManager fragmentManager = getSupportFragmentManager();
 
+        //Employee initialize
+        this.droneEmployeeFetcher = new DroneEmployeeFetcher();
+        //this.droneAtc = droneEmployeeFetcher.fetchData();
+        this.taskIndexItemIdMap = new HashMap<>();
+        this.itemIndex = SharedTaskIndex.NOTSET;
+
         //MapTools initialize
         this.mapTools = new MapTools((SupportMapFragment) fragmentManager.
                 findFragmentById(R.id.location_map));
-
-        //Employee initialize
-        this.droneEmployeeFetcher = new DroneEmployeeFetcher();
-        this.droneAtc = droneEmployeeFetcher.fetchData();
-        this.taskIndexItemIdMap = new HashMap<>();
-        this.itemIndex = SharedTaskIndex.NOTSET;
+        //this.mapTools.renderPoligon(droneAtc.getPerimeter());
 
         //Toolbar initialize
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -122,8 +147,24 @@ public class MainActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
-        } else if (id == R.id.action_send_tasks){
+        } else if (id == R.id.action_send_tasks) {
             Log.i(TAG, "UPLOAD ALL TASKS!");
+            for (Integer itemIndex : taskIndexItemIdMap.keySet()) {
+                sideMenu.removeItem(itemIndex);
+            }
+            taskIndexItemIdMap.clear();
+            itemIndex = SharedTaskIndex.NOTSET;
+
+            sharedTaskIndex.updateCurrentTask(SharedTaskIndex.NOTSET);
+            sharedTaskList.uploadTasks();
+        } else if (id == R.id.action_find_atc) {
+            if(droneAtc == null) {
+                new FetchDataTask().execute();
+            } else {
+                Snackbar.make(findViewById(R.id.coordinator_layout), "Has already ATC", Snackbar.LENGTH_SHORT)
+                    .setAction("Action", null)
+                    .show();
+            }
         }
 
         return super.onOptionsItemSelected(item);
@@ -134,11 +175,21 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
         Log.i(TAG, "IN onNavigationItemSelected ID: " + id);
 
         if (id == R.id.nav_buy) {
             Log.i(TAG, "Select nav_buy");
             switchButton.off();
+            if(droneAtc == null) {
+                Snackbar.make(findViewById(R.id.coordinator_layout),
+                        "Need find ATC", Snackbar.LENGTH_SHORT)
+                        .setAction("Action", null)
+                        .show();
+                drawer.closeDrawer(GravityCompat.START);
+                return true;
+            }
             List<String> allId = droneAtc.getDronesIds();
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Available DRONES:");
@@ -169,7 +220,6 @@ public class MainActivity extends AppCompatActivity
             sharedTaskIndex.updateCurrentTask(taskIndex);
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }

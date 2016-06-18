@@ -10,7 +10,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -30,6 +33,8 @@ public class MapTools implements
 
     private GoogleMap map;
     private ArrayList<Polyline> polylinesForTasks;
+    private ArrayList<Marker> markersForTasks;
+    private Polygon polygon;
     private int currentTaskIndex;
 
     private SharedTaskList sharedTaskList;
@@ -39,7 +44,20 @@ public class MapTools implements
         Log.i(TAG, "IN MapTools()");
         mapFragment.getMapAsync(this);
         this.polylinesForTasks = new ArrayList<>();
+        this.markersForTasks = new ArrayList<>();
         this.currentTaskIndex = SharedTaskIndex.NOTSET;
+    }
+
+    public void renderPoligon(List<Coordinate> coordinates) {
+        PolygonOptions polygonOptions = new PolygonOptions();
+        for (Coordinate coordinate : coordinates) {
+            LatLng latLng = new LatLng(coordinate.lat, coordinate.lon);
+            polygonOptions.add(latLng);
+        }
+        polygonOptions
+                .fillColor(Color.argb(0x20, 0x00, 0x00, 0xff))
+                .strokeColor(Color.argb(0xff, 0x00, 0x00, 0x60));
+        polygon = map.addPolygon(polygonOptions);
     }
 
     public GoogleMap getMap(){
@@ -55,6 +73,7 @@ public class MapTools implements
         map.getUiSettings().setMapToolbarEnabled(false);
         LatLng spb = new LatLng(59.9024, 30.2622);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(spb, 15));
+        //map.addPolygon(polygonOptions);
     }
 
     @Override
@@ -88,9 +107,10 @@ public class MapTools implements
         Polyline polyline = map.addPolyline(polylineOptions);
         polylinesForTasks.add(polyline);
 
-        map.addMarker(new MarkerOptions()
+        Marker marker = map.addMarker(new MarkerOptions()
             .position(latLng)
             .title(task.getDroneAdress()));
+        markersForTasks.add(marker);
     }
 
     @Override
@@ -98,7 +118,11 @@ public class MapTools implements
         for (Polyline polyline : polylinesForTasks) {
             polyline.remove();
         }
+        for (Marker marker : markersForTasks) {
+            marker.remove();
+        }
         polylinesForTasks.clear();
+        currentTaskIndex = SharedTaskIndex.NOTSET;
     }
 
     @Override
@@ -127,7 +151,6 @@ public class MapTools implements
         map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                //TODO: this method
                 Log.i(TAG, String.valueOf(latLng));
                 if(currentTaskIndex != SharedTaskIndex.NOTSET){
                     Coordinate waypoint = new Coordinate(latLng.latitude, latLng.longitude, 20);
