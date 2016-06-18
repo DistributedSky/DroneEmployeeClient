@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity
 
     private SharedTaskList sharedTaskList;
     private SharedTaskIndex sharedTaskIndex;
-    private ItemIdTaskMap itemIdTaskMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +60,6 @@ public class MainActivity extends AppCompatActivity
         this.droneAtc = droneEmployeeFetcher.fetchData();
         this.taskIndexItemIdMap = new HashMap<>();
         this.itemIndex = SharedTaskIndex.NOTSET;
-        this.itemIdTaskMap = new ItemIdTaskMap();
 
         //Toolbar initialize
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);

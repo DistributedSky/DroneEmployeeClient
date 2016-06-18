@@ -1,18 +1,20 @@
 package com.droneemployee.client.common;
 
+import java.util.ArrayList;
+
 /**
  * Created by simon on 06.06.16.
  */
 public class Task {
     private Drone mDrone;
-    private Route mRoute;
+    private ArrayList<Coordinate> mRoute;
     private String mDroneAdress;
 
     public Task(Ticket ticket){
         Drone drone = ticket.getDrone();
         mDrone = drone;
         mDroneAdress = drone.getAddress();
-        mRoute = new Route();
+        mRoute = new ArrayList<>();
         mRoute.add(drone.getLastPosition());
     }
 
