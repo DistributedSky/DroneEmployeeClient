@@ -27,7 +27,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private static final String LOGNAME = "MainActivity";
+    private static final String TAG = "MainActivity";
 
     private Menu sideMenu;
     private MapTools mapTools;
@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_settings) {
             return true;
         } else if (id == R.id.action_send_tasks){
-            Log.i(LOGNAME, "UPLOAD ALL TASKS!");
+            Log.i(TAG, "UPLOAD ALL TASKS!");
         }
 
         return super.onOptionsItemSelected(item);
@@ -136,10 +136,10 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        Log.i(LOGNAME, "IN onNavigationItemSelected ID: " + id);
+        Log.i(TAG, "IN onNavigationItemSelected ID: " + id);
 
         if (id == R.id.nav_buy) {
-            Log.i(LOGNAME, "Select nav_buy");
+            Log.i(TAG, "Select nav_buy");
             switchButton.off();
             List<String> allId = droneAtc.getDronesIds();
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -149,9 +149,10 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     Drone drone = droneAtc.getDrones().get(which);
-                    Log.i(LOGNAME, "Select: " + String.valueOf(drone));
+                    Log.i(TAG, "Select: " + String.valueOf(drone));
 
                     Task task = new Task(droneEmployeeFetcher.byTicket(drone));
+                    Log.i(TAG, "IN MainActivity.onNavigationItemSelected(): task id = " + task.hashCode());
                     sharedTaskList.loadTask(task);
                     itemIndex++;
                     sharedTaskIndex.updateCurrentTask(itemIndex);
@@ -166,7 +167,7 @@ public class MainActivity extends AppCompatActivity
             return true;
         } else if (taskIndexItemIdMap.containsKey(id)) {
             int taskIndex = taskIndexItemIdMap.get(id);
-            Log.i(LOGNAME, "Select TASK_INDEX: " + taskIndex);
+            Log.i(TAG, "Select TASK_INDEX: " + taskIndex);
             sharedTaskIndex.updateCurrentTask(taskIndex);
         }
 

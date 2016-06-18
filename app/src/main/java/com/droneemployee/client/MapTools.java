@@ -26,7 +26,7 @@ public class MapTools implements
         SharedTaskIndex.Observer,
         SwitchButton.OnSwitchListener
 {
-    private static String LOGNAME = "MapTools";
+    private static String TAG = "MapTools";
 
     private GoogleMap map;
     private ArrayList<Polyline> polylinesForTasks;
@@ -36,7 +36,7 @@ public class MapTools implements
     private SharedTaskIndex sharedTaskIndex;
 
     public MapTools(SupportMapFragment mapFragment) {
-        Log.i(LOGNAME, "IN MapTools()");
+        Log.i(TAG, "IN MapTools()");
         mapFragment.getMapAsync(this);
         this.polylinesForTasks = new ArrayList<>();
         this.currentTaskIndex = SharedTaskIndex.NOTSET;
@@ -48,7 +48,7 @@ public class MapTools implements
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        Log.i(LOGNAME, "IN onMapReady");
+        Log.i(TAG, "IN onMapReady");
         this.map = googleMap;
         map.setMyLocationEnabled(true);
         map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
@@ -64,7 +64,7 @@ public class MapTools implements
 
     @Override
     public void updateAddWaypoint(int taskIndex, Coordinate newCoordinate) {
-        Log.i(LOGNAME, "IN updateAddWaypoint");
+        Log.i(TAG, "IN updateAddWaypoint");
         Polyline polyline = polylinesForTasks.get(taskIndex);
         List<LatLng> points = polyline.getPoints();
         points.add(new LatLng(newCoordinate.lat, newCoordinate.lon));
@@ -73,12 +73,13 @@ public class MapTools implements
 
     @Override
     public void updateWaypoint(int taskIndex, int waypointIndex, Coordinate newCoordinate) {
-        Log.i(LOGNAME, "IN updateRouteWaypoint: taskIndex: " + taskIndex +
+        Log.i(TAG, "IN updateRouteWaypoint: taskIndex: " + taskIndex +
                 " waypointIndex: " + waypointIndex + " newCoordinate: " + newCoordinate);
     }
 
     @Override
     public void updateLoadTask(Task task) {
+        Log.i(TAG, "IN MapTools.updateLoadTask(): task id = " + task.hashCode());
         LatLng latLng = new LatLng(task.getWaypoint(0).lat, task.getWaypoint(0).lon);
         PolylineOptions polylineOptions = new PolylineOptions();
         polylineOptions.geodesic(true);
@@ -107,7 +108,7 @@ public class MapTools implements
 
     @Override
     public void updateCurrentTask(int taskIndex) {
-        Log.i(LOGNAME, "In updateCurrentTask: taskIndex: " + taskIndex);
+        Log.i(TAG, "In updateCurrentTask: taskIndex: " + taskIndex);
         if(currentTaskIndex != SharedTaskIndex.NOTSET){
             polylinesForTasks.get(currentTaskIndex).setColor(Color.BLACK);
         }
@@ -121,16 +122,16 @@ public class MapTools implements
 
     @Override
     public void switchOn() {
-        Log.i(LOGNAME, "switchOn");
+        Log.i(TAG, "switchOn");
 
         map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
                 //TODO: this method
-                Log.i(LOGNAME, String.valueOf(latLng));
+                Log.i(TAG, String.valueOf(latLng));
                 if(currentTaskIndex != SharedTaskIndex.NOTSET){
                     Coordinate waypoint = new Coordinate(latLng.latitude, latLng.longitude, 20);
-                    Log.i(LOGNAME, "IN onMapClick: waypoint: " + waypoint);
+                    Log.i(TAG, "IN onMapClick: waypoint: " + waypoint);
                     sharedTaskList.addWaypoint(currentTaskIndex, waypoint);
 
                 }
@@ -140,7 +141,7 @@ public class MapTools implements
 
     @Override
     public void switchOff() {
-        Log.i(LOGNAME, "switchOff");
+        Log.i(TAG, "switchOff");
 
         map.setOnMapClickListener(null);
     }

@@ -9,9 +9,11 @@ public class Task {
     private String mDroneAdress;
 
     public Task(Ticket ticket){
-        mDrone = ticket.getDrone();
-        mDroneAdress = ticket.getDrone().getAddress();
+        Drone drone = ticket.getDrone();
+        mDrone = drone;
+        mDroneAdress = drone.getAddress();
         mRoute = new Route();
+        mRoute.add(drone.getLastPosition());
     }
 
     public void addWaypoint(Coordinate waypoint){
@@ -24,6 +26,10 @@ public class Task {
 
     public Coordinate setWaypoint(int i, Coordinate coordinate){
         return mRoute.set(i, coordinate);
+    }
+
+    public int size() {
+        return mRoute.size();
     }
 
     @Override
