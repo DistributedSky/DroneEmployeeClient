@@ -1,7 +1,20 @@
 package com.droneemployee.client.common;
 
+import java.io.IOException;
+
 public class Drone {
-	public enum State { AVAILABLE, BUSY }
+	public enum State {
+        AVAILABLE, BUSY;
+        static State toState(String string) throws IOException {
+            if(string.equals("AVAILABLE")){
+                return AVAILABLE;
+            } else if (string.equals("BUSY")){
+                return BUSY;
+            } else {
+                throw new IOException("Can't convert. Bad string: " + string);
+            }
+        }
+    }
 
     private String mAddress;
     private State mState;

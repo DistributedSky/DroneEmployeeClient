@@ -3,7 +3,7 @@ package com.droneemployee.client;
 
 import com.droneemployee.client.common.Coordinate;
 import com.droneemployee.client.common.Drone;
-import com.droneemployee.client.common.DroneEmployeeFetcher;
+import com.droneemployee.client.common.FakeDroneATCFetcher;
 import com.droneemployee.client.common.DroneATC;
 import com.droneemployee.client.common.Task;
 
@@ -26,12 +26,12 @@ public class LibraryDroneTest {
 
     @org.junit.Test
     public void droneEmployeeBaseTest() throws Exception {
-        DroneEmployeeFetcher deb = new DroneEmployeeFetcher();
-        DroneATC droneATC = deb.fetchData();
+        FakeDroneATCFetcher deb = new FakeDroneATCFetcher();
+        DroneATC droneATC = deb.fetchDroneAtc();
         System.out.println(droneATC);
 
         Drone drone = droneATC.getDrones().get(2);
-        Task task = new Task(deb.byTicket(drone));
+        Task task = new Task(deb.buyTicket(drone));
         task.addWaypoint(new Coordinate(59.905653, 30.259567, 10));
         task.addWaypoint(new Coordinate(59.901743, 30.258366, 10));
 
@@ -40,14 +40,14 @@ public class LibraryDroneTest {
 
     @org.junit.Test
     public void taskDataTest() throws Exception {
-        DroneEmployeeFetcher deb = new DroneEmployeeFetcher();
-        DroneATC droneBase = deb.fetchData();
+        FakeDroneATCFetcher deb = new FakeDroneATCFetcher();
+        DroneATC droneBase = deb.fetchDroneAtc();
         System.out.println(droneBase);
 
         final List<Task> taskList = new ArrayList<>();
 
         for (Drone drone : droneBase.getDrones()) {
-            Task task = new Task(deb.byTicket(drone));
+            Task task = new Task(deb.buyTicket(drone));
             task.addWaypoint(new Coordinate(59.905653, 30.259567, 10));
             task.addWaypoint(new Coordinate(59.901743, 30.258366, 10));
             taskList.add(task);

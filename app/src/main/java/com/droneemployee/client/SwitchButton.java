@@ -1,11 +1,10 @@
 package com.droneemployee.client;
 
 import android.graphics.drawable.Drawable;
+import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-
-import com.droneemployee.client.common.Task;
 
 /**
  * Created by simon on 07.06.16.
@@ -20,25 +19,26 @@ public class SwitchButton implements
         void switchOn();
         void switchOff();
     }
-    private static String LOGNAME = "SwitchButton";
+    private static String TAG = "SwitchButton";
 
     private final Drawable firstImage;
 
     private final Drawable secondImage;
     private final OnSwitchListener listener;
     private boolean flag = false;
-    private ImageView imageView;
-    public SwitchButton(ImageView imageView, Drawable firstImage, Drawable secondImage,
+    private FloatingActionButton button;
+
+    public SwitchButton(FloatingActionButton button, Drawable firstImage, Drawable secondImage,
                         OnSwitchListener onSwitchListener){
         this.firstImage = firstImage;
         this.secondImage = secondImage;
         this.listener = onSwitchListener;
-        this.imageView = imageView;
+        this.button = button;
     }
 
     public void on(){
         if(!flag){
-            imageView.setImageDrawable(firstImage);
+            button.setImageDrawable(firstImage);
             listener.switchOn();
             flag = true;
         }
@@ -46,7 +46,7 @@ public class SwitchButton implements
 
     public void off(){
         if(flag){
-            imageView.setImageDrawable(secondImage);
+            button.setImageDrawable(secondImage);
             listener.switchOff();
             flag = false;
         }
@@ -54,7 +54,7 @@ public class SwitchButton implements
 
     @Override
     public void onClick(View view) {
-        ImageView button = imageView;
+        ImageView button = this.button;
         if(flag){
             button.setImageDrawable(secondImage);
             listener.switchOff();
@@ -70,7 +70,11 @@ public class SwitchButton implements
 
     @Override
     public void updateCurrentTask(int taskIndex) {
-        Log.i(LOGNAME, "In updateCurrentTask: taskIndex: " + taskIndex);
+        Log.i(TAG, "In updateCurrentTask: taskIndex: " + taskIndex);
+
+        if(taskIndex == SharedTaskIndex.NOTSET) button.hide();
+        else button.show();
+
         this.off();
     }
 }

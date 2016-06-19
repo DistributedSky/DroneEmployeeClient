@@ -8,31 +8,33 @@ import java.util.List;
  */
 //TODO: consider how to make interface of this class better
 public class DroneATC {
-    private List<Drone> mDrones;
-    private List<Coordinate> mPerimetr;
-    private String mName;
+    private List<Drone> drones;
+    private List<Coordinate> perimeter;
+    private String id;
+    private String name;
 
-    public DroneATC(String name){
-        mDrones = new ArrayList<>();
-        mPerimetr = new ArrayList<>();
-        mName = name == null? "UNDEFINED": name;
+    public DroneATC(String id, String name){
+        this.drones = new ArrayList<>();
+        this.perimeter = new ArrayList<>();
+        this.name = name == null? "UNDEFINED": name;
+        this.id = id;
     }
 
     public List<Drone> getDrones() {
-        return mDrones;
+        return drones;
     }
 
     public List<Coordinate> getPerimeter() {
-        return mPerimetr;
+        return perimeter;
     }
 
     public String getName() {
-        return mName;
+        return name;
     }
 
     public List<String> getDronesIds(){
         ArrayList<String> allId = new ArrayList<>();
-        for(Drone drone: mDrones){
+        for(Drone drone: drones){
             allId.add(drone.getAddress());
         }
         return allId;
@@ -40,6 +42,6 @@ public class DroneATC {
 
     @Override
     public String toString() {
-        return mName + " " + mDrones + mPerimetr;
+        return name + " " + drones + perimeter;
     }
 };

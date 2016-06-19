@@ -8,5 +8,6 @@
     <string name="action_send_tasks">Send tasks</string>
     <string name="action_find_atc">Find ATC</string>
     <string name="your_drones">Your drones:</string>
-    <string name="by_new_ticket">By new ticket</string>
+    <string name="by_new_ticket">Buy new ticket</string>
+    <string name="enter_address">Enter server address:</string>
 </resources>

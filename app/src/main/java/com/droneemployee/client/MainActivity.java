@@ -3,6 +3,7 @@ package com.droneemployee.client;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -15,11 +16,16 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 
 import com.droneemployee.client.common.DroneATC;
-import com.droneemployee.client.common.DroneEmployeeFetcher;
+import com.droneemployee.client.common.DroneATCFetcher;
+import com.droneemployee.client.common.FakeDroneATCFetcher;
+import com.droneemployee.client.common.NetDroneATCFetcher;
 import com.droneemployee.client.common.Task;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.droneemployee.client.common.Drone;
@@ -37,16 +43,25 @@ public class MainActivity extends AppCompatActivity
             progressDialog = new ProgressDialog(MainActivity.this);
             progressDialog.setTitle("Search ATC");
             progressDialog.setMessage("Please, wait...");
+            progressDialog.setCancelable(false);
             progressDialog.show();
         }
         @Override
         protected DroneATC doInBackground(Void... params) {
-            return droneEmployeeFetcher.fetchData();
+            return droneAtcFetcher.fetchDroneAtc();
         }
         @Override
         protected void onPostExecute(DroneATC atc) {
-            droneAtc = atc;
-            mapTools.renderPoligon(droneAtc.getPerimeter());
+            if(atc == null){
+                Snackbar snackbar = Snackbar.make(findViewById(R.id.coordinator_layout),
+                            "Load FAIL", Snackbar.LENGTH_SHORT)
+                        .setAction("Action", null);
+                snackbar.getView().setBackgroundColor(Color.rgb(0xE0, 0x00, 0x00));
+                snackbar.show();
+            } else {
+                droneAtc = atc;
+                mapTools.renderPoligon(droneAtc.getPerimeter());
+            }
             progressDialog.dismiss();
         }
     }
@@ -55,7 +70,7 @@ public class MainActivity extends AppCompatActivity
 
     private Menu sideMenu;
     private MapTools mapTools;
-    private DroneEmployeeFetcher droneEmployeeFetcher;
+    private DroneATCFetcher droneAtcFetcher;
     private DroneATC droneAtc;
     private SwitchButton switchButton;
 
@@ -76,15 +91,13 @@ public class MainActivity extends AppCompatActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
 
         //Employee initialize
-        this.droneEmployeeFetcher = new DroneEmployeeFetcher();
-        //this.droneAtc = droneEmployeeFetcher.fetchData();
+        //this.droneAtcFetcher = new NetDroneATCFetcher("http://192.168.43.81");
         this.taskIndexItemIdMap = new HashMap<>();
         this.itemIndex = SharedTaskIndex.NOTSET;
 
         //MapTools initialize
         this.mapTools = new MapTools((SupportMapFragment) fragmentManager.
                 findFragmentById(R.id.location_map));
-        //this.mapTools.renderPoligon(droneAtc.getPerimeter());
 
         //Toolbar initialize
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -146,6 +159,47 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            if(droneAtcFetcher != null){
+                Snackbar.make(findViewById(R.id.coordinator_layout),
+                        "Has already settings", Snackbar.LENGTH_SHORT)
+                        .setAction("Action", null)
+                        .show();
+                return true;
+            }
+            LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
+            View promptView = layoutInflater.inflate(R.layout.input_dialog, null);
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+            alertDialogBuilder.setView(promptView);
+
+            final EditText editAddress = (EditText) promptView.findViewById(R.id.edit_address);
+            // setup a dialog window
+            alertDialogBuilder.setCancelable(false)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            String address = editAddress.getText().toString();
+                            if(address.equals("FAKEPLEASE")) {
+                                Log.i(TAG, "set fake fetcher");
+                                droneAtcFetcher = new FakeDroneATCFetcher();
+                            } else {
+                                if(!address.substring(0,7).equals("http://")) {
+                                    address = "http://" + address;
+                                }
+                                Log.i(TAG, "new address: " + address);
+                                droneAtcFetcher = new NetDroneATCFetcher(address);
+                            }
+                        }
+                    })
+                    .setNegativeButton("Cancel",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+
+            // create an alert dialog
+            AlertDialog alert = alertDialogBuilder.create();
+            alert.show();
+
             return true;
         } else if (id == R.id.action_send_tasks) {
             Log.i(TAG, "UPLOAD ALL TASKS!");
@@ -158,13 +212,20 @@ public class MainActivity extends AppCompatActivity
             sharedTaskIndex.updateCurrentTask(SharedTaskIndex.NOTSET);
             sharedTaskList.uploadTasks();
         } else if (id == R.id.action_find_atc) {
-            if(droneAtc == null) {
+            if(droneAtcFetcher == null){
+                Snackbar.make(findViewById(R.id.coordinator_layout),
+                            "Need enter the settings", Snackbar.LENGTH_SHORT)
+                        .setAction("Action", null)
+                        .show();
+            } else if(droneAtc == null) {
                 new FetchDataTask().execute();
             } else {
-                Snackbar.make(findViewById(R.id.coordinator_layout), "Has already ATC", Snackbar.LENGTH_SHORT)
+                Snackbar.make(findViewById(R.id.coordinator_layout),
+                        "Has already ATC", Snackbar.LENGTH_SHORT)
                     .setAction("Action", null)
                     .show();
             }
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -200,7 +261,7 @@ public class MainActivity extends AppCompatActivity
                     Drone drone = droneAtc.getDrones().get(which);
                     Log.i(TAG, "Select: " + String.valueOf(drone));
 
-                    Task task = new Task(droneEmployeeFetcher.byTicket(drone));
+                    Task task = new Task(droneAtcFetcher.buyTicket(drone));
                     Log.i(TAG, "IN MainActivity.onNavigationItemSelected(): task id = " + task.hashCode());
                     sharedTaskList.loadTask(task);
                     itemIndex++;
