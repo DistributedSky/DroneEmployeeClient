@@ -6,8 +6,8 @@ import android.util.Log;
 /**
  * Created by simon on 06.06.16.
  */
-public class FakeDroneATCFetcher extends DroneATCFetcher {
-    public FakeDroneATCFetcher() {
+public class FakeATCCommunicator extends ATCCommunicator {
+    public FakeATCCommunicator() {
         super();
     }
 
@@ -53,5 +53,5 @@ public class FakeDroneATCFetcher extends DroneATCFetcher {
         return Integer.toHexString((int) (Math.random() * 15728639 + 1048576)).toUpperCase();
     }
 
-    private static String TAG = "FakeDroneATCFetcher";
+    private static String TAG = "FakeATCCommunicator";
 }

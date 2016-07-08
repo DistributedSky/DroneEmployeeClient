@@ -17,8 +17,8 @@ import java.net.URL;
 /**
  * Created by simon on 19.06.16.
  */
-public class NetDroneATCFetcher extends DroneATCFetcher {
-    private static final String TAG = "NetDroneATCFetcher";
+public class NetATCCommunicator extends ATCCommunicator {
+    private static final String TAG = "NetATCCommunicator";
     private static final int BUFFER_LEN = 1024;
     //private static final String urlAddress = "http://192.168.43.81";
     private static final String defaultPort = "7453";
@@ -26,11 +26,11 @@ public class NetDroneATCFetcher extends DroneATCFetcher {
     private String urlAddress = "";
     private String port = defaultPort;
 
-    public NetDroneATCFetcher(String address){
+    public NetATCCommunicator(String address){
         this.urlAddress = address;
     }
 
-    public NetDroneATCFetcher(String address, String port){
+    public NetATCCommunicator(String address, String port){
         this.urlAddress = address;
         this.port = port;
     }

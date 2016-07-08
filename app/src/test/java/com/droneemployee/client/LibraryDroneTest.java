@@ -3,7 +3,7 @@ package com.droneemployee.client;
 
 import com.droneemployee.client.common.Coordinate;
 import com.droneemployee.client.common.Drone;
-import com.droneemployee.client.common.FakeDroneATCFetcher;
+import com.droneemployee.client.common.FakeATCCommunicator;
 import com.droneemployee.client.common.DroneATC;
 import com.droneemployee.client.common.Task;
 
@@ -26,7 +26,7 @@ public class LibraryDroneTest {
 
     @org.junit.Test
     public void droneEmployeeBaseTest() throws Exception {
-        FakeDroneATCFetcher deb = new FakeDroneATCFetcher();
+        FakeATCCommunicator deb = new FakeATCCommunicator();
         DroneATC droneATC = deb.fetchDroneAtc();
         System.out.println(droneATC);
 
@@ -40,7 +40,7 @@ public class LibraryDroneTest {
 
     @org.junit.Test
     public void taskDataTest() throws Exception {
-        FakeDroneATCFetcher deb = new FakeDroneATCFetcher();
+        FakeATCCommunicator deb = new FakeATCCommunicator();
         DroneATC droneBase = deb.fetchDroneAtc();
         System.out.println(droneBase);
 

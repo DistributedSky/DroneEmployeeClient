@@ -23,9 +23,9 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.droneemployee.client.common.DroneATC;
-import com.droneemployee.client.common.DroneATCFetcher;
-import com.droneemployee.client.common.FakeDroneATCFetcher;
-import com.droneemployee.client.common.NetDroneATCFetcher;
+import com.droneemployee.client.common.ATCCommunicator;
+import com.droneemployee.client.common.FakeATCCommunicator;
+import com.droneemployee.client.common.NetATCCommunicator;
 import com.droneemployee.client.common.Task;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.droneemployee.client.common.Drone;
@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity
         }
         @Override
         protected DroneATC doInBackground(Void... params) {
-            return droneAtcFetcher.fetchDroneAtc();
+            return atcCommunicator.fetchDroneAtc();
         }
         @Override
         protected void onPostExecute(DroneATC atc) {
@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity
 
     private Menu sideMenu;
     private MapTools mapTools;
-    private DroneATCFetcher droneAtcFetcher;
+    private ATCCommunicator atcCommunicator;
     private DroneATC droneAtc;
     private SwitchButton switchButton;
 
@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
 
         //Employee initialize
-        //this.droneAtcFetcher = new NetDroneATCFetcher("http://192.168.43.81");
+        //this.atcCommunicator = new NetATCCommunicator("http://192.168.43.81");
         this.taskIndexItemIdMap = new HashMap<>();
         this.itemIndex = SharedTaskIndex.NOTSET;
 
@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            if(droneAtcFetcher != null){
+            if(atcCommunicator != null){
                 Snackbar.make(findViewById(R.id.coordinator_layout),
                         "Has already settings", Snackbar.LENGTH_SHORT)
                         .setAction("Action", null)
@@ -179,13 +179,13 @@ public class MainActivity extends AppCompatActivity
                             String address = editAddress.getText().toString();
                             if(address.equals("FAKEPLEASE")) {
                                 Log.i(TAG, "set fake fetcher");
-                                droneAtcFetcher = new FakeDroneATCFetcher();
+                                atcCommunicator = new FakeATCCommunicator();
                             } else {
                                 if(!address.substring(0,7).equals("http://")) {
                                     address = "http://" + address;
                                 }
                                 Log.i(TAG, "new address: " + address);
-                                droneAtcFetcher = new NetDroneATCFetcher(address);
+                                atcCommunicator = new NetATCCommunicator(address);
                             }
                         }
                     })
@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity
             sharedTaskIndex.updateCurrentTask(SharedTaskIndex.NOTSET);
             sharedTaskList.uploadTasks();
         } else if (id == R.id.action_find_atc) {
-            if(droneAtcFetcher == null){
+            if(atcCommunicator == null){
                 Snackbar.make(findViewById(R.id.coordinator_layout),
                             "Need enter the settings", Snackbar.LENGTH_SHORT)
                         .setAction("Action", null)
@@ -261,7 +261,7 @@ public class MainActivity extends AppCompatActivity
                     Drone drone = droneAtc.getDrones().get(which);
                     Log.i(TAG, "Select: " + String.valueOf(drone));
 
-                    Task task = new Task(droneAtcFetcher.buyTicket(drone));
+                    Task task = new Task(atcCommunicator.buyTicket(drone));
                     Log.i(TAG, "IN MainActivity.onNavigationItemSelected(): task id = " + task.hashCode());
                     sharedTaskList.loadTask(task);
                     itemIndex++;
