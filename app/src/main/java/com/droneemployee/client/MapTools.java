@@ -25,7 +25,6 @@ import java.util.List;
  */
 public class MapTools implements
         OnMapReadyCallback,
-        SharedTaskList.Observer,
         SharedTaskIndex.Observer,
         SwitchButton.OnSwitchListener
 {
@@ -37,7 +36,6 @@ public class MapTools implements
     private Polygon polygon;
     private int currentTaskIndex;
 
-    private SharedTaskList sharedTaskList;
     private SharedTaskIndex sharedTaskIndex;
 
     public MapTools(SupportMapFragment mapFragment) {
@@ -60,10 +58,6 @@ public class MapTools implements
         polygon = map.addPolygon(polygonOptions);
     }
 
-    public GoogleMap getMap(){
-        return map;
-    }
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         Log.i(TAG, "IN onMapReady");
@@ -73,31 +67,9 @@ public class MapTools implements
         map.getUiSettings().setMapToolbarEnabled(false);
         LatLng spb = new LatLng(59.9024, 30.2622);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(spb, 15));
-        //map.addPolygon(polygonOptions);
     }
 
-    @Override
-    public void setSharedTaskList(SharedTaskList sharedTaskList) {
-        this.sharedTaskList = sharedTaskList;
-    }
-
-    @Override
-    public void updateAddWaypoint(int taskIndex, Coordinate newCoordinate) {
-        Log.i(TAG, "IN updateAddWaypoint");
-        Polyline polyline = polylinesForTasks.get(taskIndex);
-        List<LatLng> points = polyline.getPoints();
-        points.add(new LatLng(newCoordinate.lat, newCoordinate.lon));
-        polyline.setPoints(points);
-    }
-
-    @Override
-    public void updateWaypoint(int taskIndex, int waypointIndex, Coordinate newCoordinate) {
-        Log.i(TAG, "IN updateRouteWaypoint: taskIndex: " + taskIndex +
-                " waypointIndex: " + waypointIndex + " newCoordinate: " + newCoordinate);
-    }
-
-    @Override
-    public void updateLoadTask(Task task) {
+    public void loadTask(Task task) {
         Log.i(TAG, "IN MapTools.updateLoadTask(): task id = " + task.hashCode());
         LatLng latLng = new LatLng(task.getWaypoint(0).lat, task.getWaypoint(0).lon);
         PolylineOptions polylineOptions = new PolylineOptions();
@@ -108,13 +80,13 @@ public class MapTools implements
         polylinesForTasks.add(polyline);
 
         Marker marker = map.addMarker(new MarkerOptions()
-            .position(latLng)
-            .title(task.getDroneAdress()));
+                .position(latLng)
+                .title(task.getDroneAdress()));
         markersForTasks.add(marker);
     }
 
-    @Override
-    public void updateUploadTasks() {
+    public void uploadTasks() {
+        Log.i(TAG, "In uploadTasks");
         for (Polyline polyline : polylinesForTasks) {
             polyline.remove();
         }
@@ -122,7 +94,6 @@ public class MapTools implements
             marker.remove();
         }
         polylinesForTasks.clear();
-        currentTaskIndex = SharedTaskIndex.NOTSET;
     }
 
     @Override
@@ -155,8 +126,10 @@ public class MapTools implements
                 if(currentTaskIndex != SharedTaskIndex.NOTSET){
                     Coordinate waypoint = new Coordinate(latLng.latitude, latLng.longitude, 20);
                     Log.i(TAG, "IN onMapClick: waypoint: " + waypoint);
-                    sharedTaskList.addWaypoint(currentTaskIndex, waypoint);
-
+                    Polyline polyline = polylinesForTasks.get(currentTaskIndex);
+                    List<LatLng> points = polyline.getPoints();
+                    points.add(new LatLng(waypoint.lat, waypoint.lon));
+                    polyline.setPoints(points);
                 }
             }
         });

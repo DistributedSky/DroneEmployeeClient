@@ -7,14 +7,13 @@ import java.util.ArrayList;
  */
 public class Task {
     private Drone mDrone;
-    private ArrayList<Coordinate> mRoute;
     private String mDroneAdress;
+    private ArrayList<Coordinate> mRoute = new ArrayList<>();
 
     public Task(Ticket ticket){
         Drone drone = ticket.getDrone();
         mDrone = drone;
         mDroneAdress = drone.getAddress();
-        mRoute = new ArrayList<>();
         mRoute.add(drone.getLastPosition());
     }
 

@@ -77,7 +77,6 @@ public class MainActivity extends AppCompatActivity
     private HashMap<Integer, Integer> taskIndexItemIdMap;
     private int itemIndex;
 
-    private SharedTaskList sharedTaskList;
     private SharedTaskIndex sharedTaskIndex;
 
     @Override
@@ -91,7 +90,6 @@ public class MainActivity extends AppCompatActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
 
         //Employee initialize
-        //this.atcCommunicator = new NetATCCommunicator("http://192.168.43.81");
         this.taskIndexItemIdMap = new HashMap<>();
         this.itemIndex = SharedTaskIndex.NOTSET;
 
@@ -126,9 +124,7 @@ public class MainActivity extends AppCompatActivity
         this.sideMenu = navigationView.getMenu();
 
         //===
-        this.sharedTaskList = new SharedTaskList();
         this.sharedTaskIndex = new SharedTaskIndex();
-        sharedTaskList.addObserver(mapTools);
         sharedTaskIndex.addObserver(mapTools);
         sharedTaskIndex.addObserver(switchButton);
     }
@@ -208,9 +204,9 @@ public class MainActivity extends AppCompatActivity
             }
             taskIndexItemIdMap.clear();
             itemIndex = SharedTaskIndex.NOTSET;
+            sharedTaskIndex.updateCurrentTask(itemIndex);
 
-            sharedTaskIndex.updateCurrentTask(SharedTaskIndex.NOTSET);
-            sharedTaskList.uploadTasks();
+            mapTools.uploadTasks();
         } else if (id == R.id.action_find_atc) {
             if(atcCommunicator == null){
                 Snackbar.make(findViewById(R.id.coordinator_layout),
@@ -262,8 +258,9 @@ public class MainActivity extends AppCompatActivity
                     Log.i(TAG, "Select: " + String.valueOf(drone));
 
                     Task task = new Task(atcCommunicator.buyTicket(drone));
-                    Log.i(TAG, "IN MainActivity.onNavigationItemSelected(): task id = " + task.hashCode());
-                    sharedTaskList.loadTask(task);
+                    Log.i(TAG, "IN MainActivity.onNavigationItemSelected(): task id = "
+                            + task.hashCode());
+                    mapTools.loadTask(task);
                     itemIndex++;
                     sharedTaskIndex.updateCurrentTask(itemIndex);
 
