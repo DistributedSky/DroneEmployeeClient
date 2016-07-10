@@ -28,12 +28,17 @@ public class MapTools implements
         SharedTaskIndex.Observer,
         SwitchButton.OnSwitchListener
 {
+    private class Record {
+        public Task task;
+        public Polyline polyline;
+        public Marker marker;
+    }
+
     private static String TAG = "MapTools";
 
     private GoogleMap map;
-    private ArrayList<Polyline> polylinesForTasks;
-    private ArrayList<Marker> markersForTasks;
-    private Polygon polygon;
+    private ArrayList<Record> records = new ArrayList<>();
+    private Polygon perimeter;
     private int currentTaskIndex;
 
     private SharedTaskIndex sharedTaskIndex;
@@ -41,8 +46,6 @@ public class MapTools implements
     public MapTools(SupportMapFragment mapFragment) {
         Log.i(TAG, "IN MapTools()");
         mapFragment.getMapAsync(this);
-        this.polylinesForTasks = new ArrayList<>();
-        this.markersForTasks = new ArrayList<>();
         this.currentTaskIndex = SharedTaskIndex.NOTSET;
     }
 
@@ -55,7 +58,7 @@ public class MapTools implements
         polygonOptions
                 .fillColor(Color.argb(0x20, 0x00, 0x00, 0xff))
                 .strokeColor(Color.argb(0xff, 0x00, 0x00, 0x60));
-        polygon = map.addPolygon(polygonOptions);
+        perimeter = map.addPolygon(polygonOptions);
     }
 
     @Override
@@ -77,23 +80,37 @@ public class MapTools implements
         polylineOptions.color(Color.BLACK);
         polylineOptions.add(latLng);
         Polyline polyline = map.addPolyline(polylineOptions);
-        polylinesForTasks.add(polyline);
 
         Marker marker = map.addMarker(new MarkerOptions()
                 .position(latLng)
                 .title(task.getDroneAdress()));
-        markersForTasks.add(marker);
+
+        Record record = new Record();
+        record.task = task;
+        record.polyline = polyline;
+        record.marker = marker;
+
+        records.add(record);
     }
 
-    public void uploadTasks() {
+    public List<Task> uploadTasks() {
         Log.i(TAG, "In uploadTasks");
-        for (Polyline polyline : polylinesForTasks) {
-            polyline.remove();
+
+        ArrayList<Task> tasks = new ArrayList<>();
+
+        for (Record record : records) {
+            Task task = record.task;
+            for (LatLng latLng : record.polyline.getPoints()) {
+                //TODO: modify the waypoint altitude change
+                task.addWaypoint(new Coordinate(latLng.latitude, latLng.longitude, 20));
+            }
+            tasks.add(task);
+
+            record.polyline.remove();
+            record.marker.remove();
         }
-        for (Marker marker : markersForTasks) {
-            marker.remove();
-        }
-        polylinesForTasks.clear();
+        records.clear();
+        return tasks;
     }
 
     @Override
@@ -105,14 +122,13 @@ public class MapTools implements
     public void updateCurrentTask(int taskIndex) {
         Log.i(TAG, "In updateCurrentTask: taskIndex: " + taskIndex);
         if(currentTaskIndex != SharedTaskIndex.NOTSET){
-            polylinesForTasks.get(currentTaskIndex).setColor(Color.BLACK);
+            records.get(currentTaskIndex).polyline.setColor(Color.BLACK);
         }
         currentTaskIndex = taskIndex;
         if(taskIndex == SharedTaskIndex.NOTSET){
             return;
         }
-        Polyline polyline = polylinesForTasks.get(currentTaskIndex);
-        polyline.setColor(Color.RED);
+        records.get(currentTaskIndex).polyline.setColor(Color.RED);
     }
 
     @Override
@@ -126,7 +142,7 @@ public class MapTools implements
                 if(currentTaskIndex != SharedTaskIndex.NOTSET){
                     Coordinate waypoint = new Coordinate(latLng.latitude, latLng.longitude, 20);
                     Log.i(TAG, "IN onMapClick: waypoint: " + waypoint);
-                    Polyline polyline = polylinesForTasks.get(currentTaskIndex);
+                    Polyline polyline = records.get(currentTaskIndex).polyline;
                     List<LatLng> points = polyline.getPoints();
                     points.add(new LatLng(waypoint.lat, waypoint.lon));
                     polyline.setPoints(points);
@@ -141,5 +157,4 @@ public class MapTools implements
 
         map.setOnMapClickListener(null);
     }
-
 }

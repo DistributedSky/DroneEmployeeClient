@@ -3,6 +3,8 @@ package com.droneemployee.client.common;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import java.util.List;
+
 /**
  * Created by simon on 06.06.16.
  */
@@ -43,9 +45,13 @@ public class FakeATCCommunicator extends ATCCommunicator {
     }
 
     @Override
-    public void sendTask(Task task){
-        //System.out.println(TAG + ": SEND: " + task);
-        Log.i(TAG, "SEND: " + task);
+    public void sendTasks(List<Task> tasks){
+        Log.i(TAG, "SEND: " + tasks);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        }
     }
 
     @NonNull

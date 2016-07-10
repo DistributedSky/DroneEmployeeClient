@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 /**
  * Created by simon on 19.06.16.
@@ -65,8 +66,8 @@ public class NetATCCommunicator extends ATCCommunicator {
 
     //TODO: Real send
     @Override
-    public void sendTask(Task task) {
-        Log.i(TAG, "SEND: " + task);
+    public void sendTasks(List<Task> tasks) {
+        Log.i(TAG, "SEND: " + tasks);
     }
 
     private byte[] getUrlBytes(String urlSpec) throws IOException {

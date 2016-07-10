@@ -66,6 +66,27 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private class SendDataTask extends AsyncTask<List<Task>, Void, Void> {
+        private ProgressDialog progressDialog;
+        @Override
+        protected void onPreExecute() {
+            progressDialog = new ProgressDialog(MainActivity.this);
+            progressDialog.setTitle("Sending tasks");
+            progressDialog.setMessage("Please, wait...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+        @Override
+        protected Void doInBackground(List<Task>... tasksLists) {
+            atcCommunicator.sendTasks(tasksLists[0]);
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void val) {
+            progressDialog.dismiss();
+        }
+    }
+
     private static final String TAG = "MainActivity";
 
     private Menu sideMenu;
@@ -205,8 +226,7 @@ public class MainActivity extends AppCompatActivity
             taskIndexItemIdMap.clear();
             itemIndex = SharedTaskIndex.NOTSET;
             sharedTaskIndex.updateCurrentTask(itemIndex);
-
-            mapTools.uploadTasks();
+            new SendDataTask().execute(mapTools.uploadTasks());
         } else if (id == R.id.action_find_atc) {
             if(atcCommunicator == null){
                 Snackbar.make(findViewById(R.id.coordinator_layout),

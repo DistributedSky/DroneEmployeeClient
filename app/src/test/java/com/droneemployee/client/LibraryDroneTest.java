@@ -35,7 +35,10 @@ public class LibraryDroneTest {
         task.addWaypoint(new Coordinate(59.905653, 30.259567, 10));
         task.addWaypoint(new Coordinate(59.901743, 30.258366, 10));
 
-        deb.sendTask(task);
+        ArrayList<Task> tasks = new ArrayList<>();
+        tasks.add(task);
+
+        deb.sendTasks(tasks);
     }
 
     @org.junit.Test
