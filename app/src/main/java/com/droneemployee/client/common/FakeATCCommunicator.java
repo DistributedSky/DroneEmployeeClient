@@ -45,13 +45,14 @@ public class FakeATCCommunicator extends ATCCommunicator {
     }
 
     @Override
-    public void sendTasks(List<Task> tasks){
+    public boolean sendTasks(List<Task> tasks){
         Log.i(TAG, "SEND: " + tasks);
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             Log.e(TAG, Log.getStackTraceString(e));
         }
+        return true;
     }
 
     @NonNull

@@ -11,7 +11,10 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
@@ -21,7 +24,6 @@ import java.util.List;
 public class NetATCCommunicator extends ATCCommunicator {
     private static final String TAG = "NetATCCommunicator";
     private static final int BUFFER_LEN = 1024;
-    //private static final String urlAddress = "http://192.168.43.81";
     private static final String defaultPort = "7453";
 
     private String urlAddress = "";
@@ -66,8 +68,36 @@ public class NetATCCommunicator extends ATCCommunicator {
 
     //TODO: Real send
     @Override
-    public void sendTasks(List<Task> tasks) {
+    public boolean sendTasks(List<Task> tasks) {
         Log.i(TAG, "SEND: " + tasks);
+        boolean result = false;
+
+        try {
+            URL url = new URL(urlAddress + ":" + port);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            try {
+                connection.setDoOutput(true);
+
+                OutputStream stream = connection.getOutputStream();
+                stream.write(generateJSONTasks(tasks).toString().getBytes());
+                stream.close();
+
+                if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    Log.i(TAG, "SEND: OK");
+                    result = true;
+                }
+            } catch (IOException ioe) {
+                Log.e(TAG, "SEND: FAILED", ioe);
+            } finally {
+                connection.disconnect();
+            }
+        } catch (MalformedURLException mue) {
+            Log.e(TAG, "Failed to parse url", mue);
+        } catch (IOException ioe) {
+            Log.e(TAG, "Filed to open connection", ioe);
+        } finally {
+            return result;
+        }
     }
 
     private byte[] getUrlBytes(String urlSpec) throws IOException {
@@ -120,6 +150,39 @@ public class NetATCCommunicator extends ATCCommunicator {
         }
         Log.i(TAG, atc.toString());
         return atc;
+    }
+
+    private JSONObject generateJSONOneTask(Task task) {
+        try {
+            JSONArray jsonRoute = new JSONArray();
+            for (int i = 0; i < task.size(); i++) {
+                Coordinate coordinate = task.getWaypoint(i);
+                JSONObject jsonCoordinate = new JSONObject();
+                jsonCoordinate
+                        .put("lat", coordinate.lat)
+                        .put("lng", coordinate.lng)
+                        .put("alt", coordinate.alt);
+                jsonRoute.put(jsonCoordinate);
+            }
+
+            JSONObject jsonTask = new JSONObject();
+            jsonTask
+                    .put("id", task.getDroneAdress())
+                    .put("route", jsonRoute);
+
+            return jsonTask;
+        } catch (JSONException je) {
+            Log.e(TAG, "Failed generate JSON", je);
+        }
+        return null;
+    }
+
+    private JSONArray generateJSONTasks(List<Task> tasks) {
+        JSONArray jsonTasks = new JSONArray();
+        for (Task task : tasks) {
+            jsonTasks.put(generateJSONOneTask(task));
+        }
+        return jsonTasks;
     }
 
     //TODO: Remove this method

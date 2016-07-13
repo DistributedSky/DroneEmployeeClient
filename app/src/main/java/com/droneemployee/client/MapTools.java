@@ -52,7 +52,7 @@ public class MapTools implements
     public void renderPoligon(List<Coordinate> coordinates) {
         PolygonOptions polygonOptions = new PolygonOptions();
         for (Coordinate coordinate : coordinates) {
-            LatLng latLng = new LatLng(coordinate.lat, coordinate.lon);
+            LatLng latLng = new LatLng(coordinate.lat, coordinate.lng);
             polygonOptions.add(latLng);
         }
         polygonOptions
@@ -74,7 +74,7 @@ public class MapTools implements
 
     public void loadTask(Task task) {
         Log.i(TAG, "IN MapTools.updateLoadTask(): task id = " + task.hashCode());
-        LatLng latLng = new LatLng(task.getWaypoint(0).lat, task.getWaypoint(0).lon);
+        LatLng latLng = new LatLng(task.getWaypoint(0).lat, task.getWaypoint(0).lng);
         PolylineOptions polylineOptions = new PolylineOptions();
         polylineOptions.geodesic(true);
         polylineOptions.color(Color.BLACK);
@@ -144,7 +144,7 @@ public class MapTools implements
                     Log.i(TAG, "IN onMapClick: waypoint: " + waypoint);
                     Polyline polyline = records.get(currentTaskIndex).polyline;
                     List<LatLng> points = polyline.getPoints();
-                    points.add(new LatLng(waypoint.lat, waypoint.lon));
+                    points.add(new LatLng(waypoint.lat, waypoint.lng));
                     polyline.setPoints(points);
                 }
             }

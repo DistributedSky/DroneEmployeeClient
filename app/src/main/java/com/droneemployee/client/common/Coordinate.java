@@ -3,26 +3,26 @@ package com.droneemployee.client.common;
 public class Coordinate {
 	public Coordinate(){
 		lat = 0;
-		lon = 0;
+		lng = 0;
 		alt = 0;
 	}
 
-	public Coordinate(double lat, double lon, double alt){
+	public Coordinate(double lat, double lng, double alt){
 		this.lat = lat;
-		this.lon = lon;
+		this.lng = lng;
 		this.alt = alt;
 	}
 
-	public Coordinate(double lat, double lon) {
-        this(lat, lon, 0);
+	public Coordinate(double lat, double lng) {
+        this(lat, lng, 0);
     }
 
 	@Override
 	public String toString(){
-		return "Coordinate(" + lat + ", " + lon + ", " + alt + ")";
+		return "Coordinate(" + lat + ", " + lng + ", " + alt + ")";
 	}
 
 	public double lat;
-	public double lon;
+	public double lng;
 	public double alt;
 }

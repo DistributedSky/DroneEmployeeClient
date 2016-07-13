@@ -8,5 +8,5 @@ import java.util.List;
 public abstract class ATCCommunicator {
     public abstract DroneATC fetchDroneAtc();
     public abstract Ticket buyTicket(Drone drone);
-    public abstract void sendTasks(List<Task> tasks);
+    public abstract boolean sendTasks(List<Task> tasks);
 }

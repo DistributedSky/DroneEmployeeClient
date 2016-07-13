@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private class SendDataTask extends AsyncTask<List<Task>, Void, Void> {
+    private class SenderDataTask extends AsyncTask<List<Task>, Void, Void> {
         private ProgressDialog progressDialog;
         @Override
         protected void onPreExecute() {
@@ -226,7 +226,7 @@ public class MainActivity extends AppCompatActivity
             taskIndexItemIdMap.clear();
             itemIndex = SharedTaskIndex.NOTSET;
             sharedTaskIndex.updateCurrentTask(itemIndex);
-            new SendDataTask().execute(mapTools.uploadTasks());
+            new SenderDataTask().execute(mapTools.uploadTasks());
         } else if (id == R.id.action_find_atc) {
             if(atcCommunicator == null){
                 Snackbar.make(findViewById(R.id.coordinator_layout),
