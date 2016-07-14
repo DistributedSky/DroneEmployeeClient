@@ -12,7 +12,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -39,12 +38,12 @@ public class NetATCCommunicator extends ATCCommunicator {
     }
 
     @Override
-    public DroneATC fetchDroneAtc() {
+    public DroneATC fetchDroneAtc(Coordinate currentLocation) {
         try {
             String url = Uri.parse(urlAddress + ":" + port)
                     .buildUpon()
-                    .appendQueryParameter("lat", "1234")
-                    .appendQueryParameter("lng", "9876")
+                    .appendQueryParameter("lat", String.valueOf(currentLocation.lat))
+                    .appendQueryParameter("lng", String.valueOf(currentLocation.lng))
                     .build()
                     .toString();
             Log.i(TAG, "url: " + url);

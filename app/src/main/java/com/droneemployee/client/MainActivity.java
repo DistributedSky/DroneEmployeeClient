@@ -3,11 +3,16 @@ package com.droneemployee.client;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
@@ -22,11 +27,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
+import com.droneemployee.client.common.Coordinate;
 import com.droneemployee.client.common.DroneATC;
 import com.droneemployee.client.common.ATCCommunicator;
 import com.droneemployee.client.common.FakeATCCommunicator;
 import com.droneemployee.client.common.NetATCCommunicator;
 import com.droneemployee.client.common.Task;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.droneemployee.client.common.Drone;
 
@@ -34,10 +44,28 @@ import java.util.HashMap;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements
+        NavigationView.OnNavigationItemSelectedListener,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
+
+    private static final String TAG = "MainActivity";
+
+    private Menu sideMenu;
+    private MapTools mapTools;
+    private GoogleApiClient apiClient;
+    private ATCCommunicator atcCommunicator;
+    private DroneATC droneAtc;
+    private SwitchButton switchButton;
+    private SharedTaskIndex sharedTaskIndex;
+
+    private HashMap<Integer, Integer> taskIndexItemIdMap = new HashMap<>();
+    private int itemIndex = SharedTaskIndex.NOTSET;
+    private boolean apiConnectOk = false;
 
     private class FetchDataTask extends AsyncTask<Void, Void, DroneATC> {
         private ProgressDialog progressDialog;
+
         @Override
         protected void onPreExecute() {
             progressDialog = new ProgressDialog(MainActivity.this);
@@ -46,10 +74,19 @@ public class MainActivity extends AppCompatActivity
             progressDialog.setCancelable(false);
             progressDialog.show();
         }
+
         @Override
         protected DroneATC doInBackground(Void... params) {
-            return atcCommunicator.fetchDroneAtc();
+            if (apiConnectOk) {
+                Location location = LocationServices.FusedLocationApi.getLastLocation(apiClient);
+                Coordinate myLocation = new Coordinate(
+                        location.getLatitude(),
+                        location.getLongitude());
+                return atcCommunicator.fetchDroneAtc(myLocation);
+            }
+            return null;
         }
+
         @Override
         protected void onPostExecute(DroneATC atc) {
             if(atc == null){
@@ -87,19 +124,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private static final String TAG = "MainActivity";
-
-    private Menu sideMenu;
-    private MapTools mapTools;
-    private ATCCommunicator atcCommunicator;
-    private DroneATC droneAtc;
-    private SwitchButton switchButton;
-
-    private HashMap<Integer, Integer> taskIndexItemIdMap;
-    private int itemIndex;
-
-    private SharedTaskIndex sharedTaskIndex;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //TODO: REFACTOR this method
@@ -110,13 +134,16 @@ public class MainActivity extends AppCompatActivity
         //Fragment manager initialize
         FragmentManager fragmentManager = getSupportFragmentManager();
 
-        //Employee initialize
-        this.taskIndexItemIdMap = new HashMap<>();
-        this.itemIndex = SharedTaskIndex.NOTSET;
-
         //MapTools initialize
         this.mapTools = new MapTools((SupportMapFragment) fragmentManager.
                 findFragmentById(R.id.location_map));
+
+        //Google API client initialize
+        apiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
 
         //Toolbar initialize
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -148,6 +175,35 @@ public class MainActivity extends AppCompatActivity
         this.sharedTaskIndex = new SharedTaskIndex();
         sharedTaskIndex.addObserver(mapTools);
         sharedTaskIndex.addObserver(switchButton);
+    }
+
+    @Override
+    protected void onStart() {
+        apiClient.connect();
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        apiClient.disconnect();
+        super.onStop();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        apiConnectOk = true;
+    }
+
+    //TODO: something in this method
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    //TODO: processing fail
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 
     @Override

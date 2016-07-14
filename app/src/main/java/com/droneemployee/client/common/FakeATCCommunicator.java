@@ -14,7 +14,7 @@ public class FakeATCCommunicator extends ATCCommunicator {
     }
 
     @Override
-    public DroneATC fetchDroneAtc(){
+    public DroneATC fetchDroneAtc(Coordinate currentLocation){
         DroneATC droneATC = new DroneATC("0xfba455270712957", "Current ATC");
         droneATC.getDrones().add(new Drone(genirateHexRandomString(), new Coordinate(59.903322, 30.267378, 10), Drone.State.AVAILABLE));
         droneATC.getDrones().add(new Drone(genirateHexRandomString(), new Coordinate(59.900617, 30.262357, 10), Drone.State.AVAILABLE));

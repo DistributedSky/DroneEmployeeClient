@@ -27,7 +27,7 @@ public class LibraryDroneTest {
     @org.junit.Test
     public void droneEmployeeBaseTest() throws Exception {
         FakeATCCommunicator deb = new FakeATCCommunicator();
-        DroneATC droneATC = deb.fetchDroneAtc();
+        DroneATC droneATC = deb.fetchDroneAtc(new Coordinate(123, 987));
         System.out.println(droneATC);
 
         Drone drone = droneATC.getDrones().get(2);
@@ -44,7 +44,7 @@ public class LibraryDroneTest {
     @org.junit.Test
     public void taskDataTest() throws Exception {
         FakeATCCommunicator deb = new FakeATCCommunicator();
-        DroneATC droneBase = deb.fetchDroneAtc();
+        DroneATC droneBase = deb.fetchDroneAtc(new Coordinate(123, 987));
         System.out.println(droneBase);
 
         final List<Task> taskList = new ArrayList<>();
