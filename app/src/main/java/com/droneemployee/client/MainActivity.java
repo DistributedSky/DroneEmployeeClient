@@ -3,7 +3,6 @@ package com.droneemployee.client;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -12,7 +11,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
@@ -36,7 +34,6 @@ import com.droneemployee.client.common.Task;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.droneemployee.client.common.Drone;
 
@@ -61,68 +58,11 @@ public class MainActivity extends AppCompatActivity
 
     private HashMap<Integer, Integer> taskIndexItemIdMap = new HashMap<>();
     private int itemIndex = SharedTaskIndex.NOTSET;
-    private boolean apiConnectOk = false;
 
-    private class FetchDataTask extends AsyncTask<Void, Void, DroneATC> {
-        private ProgressDialog progressDialog;
-
-        @Override
-        protected void onPreExecute() {
-            progressDialog = new ProgressDialog(MainActivity.this);
-            progressDialog.setTitle("Search ATC");
-            progressDialog.setMessage("Please, wait...");
-            progressDialog.setCancelable(false);
-            progressDialog.show();
-        }
-
-        @Override
-        protected DroneATC doInBackground(Void... params) {
-            if (apiConnectOk) {
-                Location location = LocationServices.FusedLocationApi.getLastLocation(apiClient);
-                Coordinate myLocation = new Coordinate(
-                        location.getLatitude(),
-                        location.getLongitude());
-                return atcCommunicator.fetchDroneAtc(myLocation);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(DroneATC atc) {
-            if(atc == null){
-                Snackbar snackbar = Snackbar.make(findViewById(R.id.coordinator_layout),
-                            "Load FAIL", Snackbar.LENGTH_SHORT)
-                        .setAction("Action", null);
-                snackbar.getView().setBackgroundColor(Color.rgb(0xE0, 0x00, 0x00));
-                snackbar.show();
-            } else {
-                droneAtc = atc;
-                mapTools.renderPoligon(droneAtc.getPerimeter());
-            }
-            progressDialog.dismiss();
-        }
-    }
-
-    private class SenderDataTask extends AsyncTask<List<Task>, Void, Void> {
-        private ProgressDialog progressDialog;
-        @Override
-        protected void onPreExecute() {
-            progressDialog = new ProgressDialog(MainActivity.this);
-            progressDialog.setTitle("Sending tasks");
-            progressDialog.setMessage("Please, wait...");
-            progressDialog.setCancelable(false);
-            progressDialog.show();
-        }
-        @Override
-        protected Void doInBackground(List<Task>... tasksLists) {
-            atcCommunicator.sendTasks(tasksLists[0]);
-            return null;
-        }
-        @Override
-        protected void onPostExecute(Void val) {
-            progressDialog.dismiss();
-        }
-    }
+    public MapTools getMapTools() { return mapTools; }
+    public GoogleApiClient getApiClient() { return apiClient; }
+    public ATCCommunicator getAtcCommunicator() { return atcCommunicator; }
+    public void setDroneAtc(DroneATC atc) { this.droneAtc = atc; }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,7 +111,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         this.sideMenu = navigationView.getMenu();
 
-        //===
+        //Initialize SharedTaskIndex
         this.sharedTaskIndex = new SharedTaskIndex();
         sharedTaskIndex.addObserver(mapTools);
         sharedTaskIndex.addObserver(switchButton);
@@ -189,9 +129,10 @@ public class MainActivity extends AppCompatActivity
         super.onStop();
     }
 
+    //TODO: something in this method
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        apiConnectOk = true;
+
     }
 
     //TODO: something in this method
@@ -233,10 +174,7 @@ public class MainActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             if(atcCommunicator != null){
-                Snackbar.make(findViewById(R.id.coordinator_layout),
-                        "Has already settings", Snackbar.LENGTH_SHORT)
-                        .setAction("Action", null)
-                        .show();
+                showMessage("Has already settings");
                 return true;
             }
             LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
@@ -275,27 +213,26 @@ public class MainActivity extends AppCompatActivity
 
             return true;
         } else if (id == R.id.action_send_tasks) {
-            Log.i(TAG, "UPLOAD ALL TASKS!");
-            for (Integer itemIndex : taskIndexItemIdMap.keySet()) {
-                sideMenu.removeItem(itemIndex);
+            if(atcCommunicator != null) {
+                Log.i(TAG, "UPLOAD ALL TASKS!");
+
+                for (Integer itemIndex : taskIndexItemIdMap.keySet()) {
+                    sideMenu.removeItem(itemIndex);
+                }
+                taskIndexItemIdMap.clear();
+                itemIndex = SharedTaskIndex.NOTSET;
+                sharedTaskIndex.updateCurrentTask(itemIndex);
+                new SendDataTask(this).run(mapTools.uploadTasks());
+            } else {
+                showMessage("Nothing to send");
             }
-            taskIndexItemIdMap.clear();
-            itemIndex = SharedTaskIndex.NOTSET;
-            sharedTaskIndex.updateCurrentTask(itemIndex);
-            new SenderDataTask().execute(mapTools.uploadTasks());
         } else if (id == R.id.action_find_atc) {
             if(atcCommunicator == null){
-                Snackbar.make(findViewById(R.id.coordinator_layout),
-                            "Need enter the settings", Snackbar.LENGTH_SHORT)
-                        .setAction("Action", null)
-                        .show();
+                showMessage("Need enter the settings");
             } else if(droneAtc == null) {
-                new FetchDataTask().execute();
+                new FetchDataTask(this).run();
             } else {
-                Snackbar.make(findViewById(R.id.coordinator_layout),
-                        "Has already ATC", Snackbar.LENGTH_SHORT)
-                    .setAction("Action", null)
-                    .show();
+                showMessage("Has already ATC");
             }
             return true;
         }
@@ -316,10 +253,7 @@ public class MainActivity extends AppCompatActivity
             Log.i(TAG, "Select nav_buy");
             switchButton.off();
             if(droneAtc == null) {
-                Snackbar.make(findViewById(R.id.coordinator_layout),
-                        "Need find ATC", Snackbar.LENGTH_SHORT)
-                        .setAction("Action", null)
-                        .show();
+                showMessage("Need find ATC");
                 drawer.closeDrawer(GravityCompat.START);
                 return true;
             }
@@ -356,5 +290,20 @@ public class MainActivity extends AppCompatActivity
 
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    void showMessage(String message) {
+        Snackbar.make(findViewById(R.id.coordinator_layout),
+                message, Snackbar.LENGTH_SHORT)
+                //.setAction("Action", null)
+                .show();
+    }
+
+    void showWarningMessage(String message) {
+        Snackbar snackbar = Snackbar.make(findViewById(R.id.coordinator_layout),
+                message, Snackbar.LENGTH_SHORT);
+                //.setAction("Action", null);
+        snackbar.getView().setBackgroundColor(Color.rgb(0xE0, 0x00, 0x00));
+        snackbar.show();
     }
 }

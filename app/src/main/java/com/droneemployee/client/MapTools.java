@@ -1,6 +1,7 @@
 package com.droneemployee.client;
 
 import android.graphics.Color;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.droneemployee.client.common.Coordinate;
@@ -93,6 +94,7 @@ public class MapTools implements
         records.add(record);
     }
 
+    @NonNull
     public List<Task> uploadTasks() {
         Log.i(TAG, "In uploadTasks");
 
